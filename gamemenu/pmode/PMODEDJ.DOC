@@ -1,0 +1,567 @@
+PMODE 3.07 is Copyright (c) 1994, by Tran (a.k.a. Thomas Pytel).
+PMODE/DJ modifications are Copyright (c) 2000, by Charles Sandmann.
+PMODE/DJ modifications are Copyright (c) 1996, by Matthias Grimrath.
+PMSTUB.ASM is Copyright (c) 1995, by DJ Delorie, distributed with permission.
+
+License Information
+-------------------
+
+PMODE/DJ is free software.  It may be used or distributed in any manner you
+wish, as long as you do not try to sell an extender based on PMODE.  You
+may use this software in for profit productions.  If you use this software
+in any package, you MUST give credit to Thomas Pytel and Matthias Grimrath.
+
+If you use it in for profit productions, you are encouraged to email
+the authors of PMODE/DJ.  All others may give feedback, too, of course!
+
+PMODE/DJ comes with ABSOLUTELY NO WARRANTY; excluding any and all implied
+warranties, including warranties of merchantability and fitness for a
+particular purpose.  There is no warranty or representation, either express
+or implied, with respect to this code, its quality, performance,
+merchantability, or fitness for a particular purpose.  The entire risk
+of using this program is with you.  There will be no liability for special,
+incidental, or consequential damages arising out of or resulting from the use
+or modification of this code.
+
+
+What is PMODE/DJ?
+-----------------
+
+PMODE/DJ is an enhanced version of Tran's PMODE 3.07 for DJGPP.  It provides
+DPMI 0.9 services which are needed for a DJGPP image to run under DOS, where
+DPMI services usually are not available.  PMODE/DJ was designed for speed and
+small size, so it is ideal for demos, games and time critical programs.
+PMODE/DJ is an alternative to CWSDPMI which allows an imbedded DPMI provider
+in the stub instead of being in a separate image.
+
+PMODE/DJ comes in two forms:
+
+- A stubonly version (pmodstub.exe) is a stub that can be bound to the
+  coff image produced by DJGPP V2's gcc.  No other programs are required
+  to run the DJGPP app, you need just the single executable file.
+
+- A TSR version.  This is more or less a direct replacement of CWSDPMI,
+  which does not require existing images to have the stub replaced.
+
+The main porting was done by Matthias Grimrath.  (m.grimrath@tu-bs.de)
+Release 1.3 was made by Charles Sandmann.  (sandmann@clio.rice.edu)
+
+Thanks must go to:
+- Thomas Pytel for writing such excellent code.
+
+- Chris Matrakidis (c.matrakidis@eleceng.ucl.ac.uk) who corrected the cpu
+  identification, wrote the DPMI functions 0xE00 + 0xE01, improved
+  exception handling and FPU emulation.
+
+- Charles Sandmann (sandmann@clio.rice.edu) who made the TSR version
+  together with Chris Matrakidis and distributed PMODE/DJ.
+
+-----------------------------------------------------------------------
+
+Files:
+~~~~~~
+In pmode13b.zip:
+
+PMODSTUB.EXE            Stubonly version
+PMODETSR.EXE            TSR version
+PMODEDJ.DOC             This file
+
+In pmode13s.zip:
+
+PMODE.ASM               Kernel of PMODE/DJ 1.3
+PMODSTUB.ASM            Stubonly source
+PMODETSR.ASM            TSR source
+PADSEC.C                Tool to build PMODSTUB.EXE
+EHDRFIX.C               Tool to build PMODESTR.EXE
+CRT1.C                  Patch for startup code (only needed for djgpp 2.0)
+MAKEFILE                Makefile for GNU Make (also requires tasm/tlink)
+MAKEFILE.BOR            Makefile for Borland Make (requires tcc/tasm/tlink)
+
+-----------------------------------------------------------------------
+
+How to use:
+~~~~~~~~~~~
+
+- If you want a single executable file, type
+    'copy /B pmodstub.exe + a.out prog.exe'
+  This assumes 'a.out' is the coff(*) image and 'prog.exe' the name of the
+  final executable.  Voila! 'prog.exe' should be fully operational.
+
+  Another way would be to copy 'pmodstub.exe' in the same directory of your
+  program, possibly renaming it, and change the PMODE/DJ stub to load your
+  program - here "myprogram" - by using 'stubedit' and changing the runfile.
+  Example: 'stubedit pmodstub.exe -runfile=myprogram'
+  Now you can run your program under two names, in this example 'pmodstub'
+  and 'myprogram'.
+
+  This way you can easily test your program both with PMODE/DJ and with the
+  standard stub.
+
+
+  (*) Since gcc comes from Un*x, it produces so called coff files, which
+      are executable files on some Unices. Obviously DOS is not Un*x, that's
+      why each DJGPP produced program has a stub in front of it which DOS can
+      execute. The stub itself then executes the coff file.
+
+      DJGPP's gcc makes both the plain coff file and a DOS
+      executable, unless you specify to omit the coff file.
+
+      Example:
+      'gcc file1 file2 file3 ... -o prog' creates both 'prog' and
+      'prog.exe', where 'prog' is the plain coff file and 'prog.exe' the
+      same coff file prepended a DOS stub to it.
+
+      'gcc file1 file2 file3 ... -o app.exe' by contrast will only produce
+      a stubbed coff file called 'app.exe'. (You may get the plain coff file
+      from it by running 'exe2coff' on it)
+
+
+- To use the TSR version, copy it into the same directory of your
+  program, or somewhere in your path.  Then stubedit your program to change
+  the filename of the DPMI provider to PMODETSR.EXE.  For quick testing, run
+  PMODETSR.EXE by hand, followed by your program. You can also rename
+  PMODETSR.EXE to CWSDPMI.EXE and place it in the same directory as the
+  image being executed. The TSR will only stay resident for a single DPMI
+  program execution (it's really designed to be dynamically loaded) and is
+  not specific to DJGPP (it follows the DPMI 0.9 specification).
+
+
+The optimal setup for PMODE/DJ is a plain DOS system, loaded with HIMEM.SYS
+or without any memory utility at all. (no EMM386 or other EMS Memory Manager)
+
+If you want to compress the stub, you will have to pad the compressed exefile
+on a 512 byte boundary.  Otherwise you cannot execute the file, at least not
+from other DJGPP programs.  You have to change both the filesize and the
+exeheader!
+
+Replacing CWSDPMI with PMODETSR for all programs and development is usually
+a bad idea, since PMODE/DJ doesn't free allocated resources itself, and it
+has some other limitations listed below.  If your program crashes many times,
+you may run out of memory.
+
+You should also note that PMODE/DJ is a bit incompatible with
+DJGPP version 2.0.  Versions 2.01 or higher shouldn't cause trouble.  See
+Pitfalls for details.
+
+One last word: PMODE/DJ is out for quite a while now, but there was little to
+no feedback. We would really like to know if anyone is using this program,
+and if so, what experiences you have made. Don't be shy, we won't bite you!
+
+
+-----------------------------------------------------------------------
+
+Pitfalls in PMODE/DJ:
+~~~~~~~~~~~~~~~~~~~~~
+
+Following up are some things to take care of when using PMODE/DJ.  Mostly
+they deal with practices allowed by true DPMI hosts but cause PMODE/DJ
+to hang.
+
+The following list is quite long; however, most programs will run smoothly.
+Unless your are doing tricky things you won't run into trouble. As a general
+guide, if you don't understand one of the sections below, you may ignore it.
+(Because you are probably not doing the things described there)
+
+Just try if PMODE/DJ works for you!
+
+
+) PMODE/DJ doesn't offer virtual memory.  For ported Unix/Windows/OS2 or
+  other memory consuming apps PMODE/DJ probably is the wrong choice.  But
+  it is the right thing for demos and freaky stuff! :=)
+
+  Often people think that using PMODE/DJ (or CWSDPR0) makes locking memory(*)
+  unnecessary.  THIS IS NOT TRUE!  A user may choose to run your program
+  under a DPMI host (Windows for example), which requires memory to be locked
+  AND has complete control over the system.  PMODE/DJ has no choice and must
+  pass control to that DPMI host, and so your program MUST lock memory!
+
+  (*) If you don't know what "locking memory" means and why it must be used,
+      please get the latest FAQ (2.02 as of this writing) and read the
+      chapters about interrupts and low-level programming.  It's too complex
+      to describe here.
+
+
+) The stack registers 'ss:esp' must always contain valid values, or
+  interrupts must be disabled.  So if your last-ounce-of-speed-optimized
+  assembler routine (mis)uses 'esp' to get another register, disable
+  interrupts before.  The 'ceil()' and 'floor()' functions of 'libm.a' have
+  a bug and use memory below the stack pointer.  Do not use these functions
+  unless you disable interrupts or use CWSDPMI (even then, these functions
+  won't work with FPU emulation).(*) The reason is that PMODE/DJ doesn't
+  switch stacks on interrupts for speed reasons.  All other DPMI hosts which
+  don't run at ring 0 seem to change stacks.
+
+  (*) They might be fixed as of this writing
+
+
+) You might consider writing your own versions of malloc/free.
+  (Or write your own new/delete operator, if you are talking C++).
+  The default functions often allocate much more memory than actually
+  needed. Quite ok for systems with virtual memory, but annoying under
+  PMODE/DJ.
+
+
+) Avoid allocation of small and many DPMI memory blocks.  DPMI memory
+  allocation calls are made with each call to sbrk which itself is
+  called by 'malloc()' or 'new' if the current heap is not big enough.
+  There's a strict number of memory handles under a XMS system (booted
+  only with HIMEM.SYS).  You can get away from this problem if you use
+  the unix sbrk algorithm (see <ctr0.h> for details).  However, when you
+  use the unix sbrk algorithm the base address of your program may change;
+  using 4GB nearpointers gets complicated.  (Nothing is perfect... :( )
+
+  This problem only occurs under XMS (aka HIMEM.SYS). Under VCPI or raw
+  mode (other types of memory modes PMODE/DJ handles) you can allocate
+  as many blocks as fit into the memory.
+
+  Newer versions of HIMEM.SYS doesn't seem to have a limited number of
+  memory handles.  If you face problems with memory you might try to
+  upgrade your HIMEM.SYS.
+
+
+) DJGPP V2.0 startup code is incompatible with the stubonly version.
+  If you have V2.01 (or higher) installed you may safely skip this paragraph.
+  You may also delete the 'crt1.?' files.
+
+  If you still have V2.0 it's a good idea to upgrade to V2.01.  It has fixes
+  for many bugs found in V2.0.
+
+  In V2.0 the psp address in _go32_info_block is not valid (it's computed
+  based on an assumption of the layout of the stub which isn't true).
+  Even though you may not use the psp address, it is implicitly
+  used by the library function fstat() and routines which may call it.
+
+  As a work around, use the TSR version, or relink the image using the
+  included CRT1.o which contains a fix for the bug.  You might want to
+  insert the fixed CRT1.o into your libc.
+
+
+) One word ahead: The following section smells like a troublemaker, but in
+  fact it isn't.  For your information, CWSDPMI is reprogramming the PIC too,
+  and CWSDPMI runs well.
+
+  PMODE/DJ attempts to reprogram the first interrupt controller to give
+  exception handling.  Even though you can use the standard PIC
+  mappings for hardware interrupt hooking, you should know that the
+  interrupt numbers are mapped internally.  You'll only notice it
+  if you try to set a protected mode interrupt that is occupied by the
+  reprogrammed PIC (most likely ints from 0x88 to 0x8F).  In such a case
+  the setting of such an interrupt will fail.  However, if you specify
+  'int $8' directly, PMODE/DJ recognizes it as a software int and passes
+  it down to the real mode int handler.
+
+  If the master base interrupt controller was reprogrammed before
+  PMODE/DJ started, PMODE/DJ will not reprogram it and will report the
+  unusual base.  Most programs would fail in this case.  If you want
+  to be completely compatible use the following method to set an hardware
+  irq:
+
+  1. Get master PIC base from
+     _go32_info_block.master_interrupt_controller_base, or from DPMI
+     function 0x400 directly.
+  2. Add the IRQ number (for example 0 = timer, 1 = keyboard).
+  3. Use this number to set a real or protected mode interrupt.
+  4. Don't forget to unhook interrupts at exit! (Both real and protected)
+
+
+  PMODE/DJ hooks real mode hardware interrupts if your program hooks the
+  protected mode hardware interrupt. This means your protected mode
+  hardware IRQ handler gets called even if the CPU is in real mode.
+  However, whenever a hardware interrupt occurs in real mode, each time
+  a mode switch happens before your IRQ handler gets called. PMODE/DJ is
+  quite fast in mode switching, but if the IRQ's frequency is too high
+  (>1kHz), consider installing a bimodal handler (see FAQ for details),
+  or make sure your program stays in protected mode all the time.
+
+  All other real mode interrupts are not hooked by PMODE/DJ. If you want
+  to trap these, use a callback.
+
+
+) Free any extended memory blocks that were allocated.  Unless you don't
+  use the DPMI allocation functions directly you needn't care about
+  that.  All memory that was allocated through library functions gets
+  freed automatically at exit.
+
+
+) Instead of issuing ints directly use the DPMI translation function
+  0x300.  In particular, use __dpmi_int() instead of int86() to call real
+  mode services (for protected mode services still use int86()).
+  Software interrupts are recognized as such, so this is more an advice.
+
+
+) DPMI calls that switch to real mode may clobber the coprocessor.
+  This is a problem for assembler code only.
+
+
+) PMODE/DJ checks for the presence of a DPMI host first.  In that case
+  your program talks to the DPMI host and not PMODE/DJ.  As discussed above,
+  PMODE/DJ doesn't support all DPMI 0.9 features, so if you develop under a
+  DPMI host be sure you sometimes test with PMODE/DJ being active!
+
+
+) DOS4GW (tm) doesn't work with PMODETSR.EXE (or CWSDPR0.EXE either).
+
+
+) PMODE/DJ 1.0 has a serious bug.  When using software interrupts,
+  the flags are not passed back correctly.
+
+  If you have PMODE/DJ 1.0 installed, simply delete it and use this one.
+
+
+-----------------------------------------------------------------------
+
+Changes from 1.0 to 1.1:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- software interrupt bug fixed. The flags from realmode haven't been passed
+  back correctly. Functions 30xh are not affected.
+- Hooking a protected mode hardware interrupt transparently hooks the
+  real mode interrupt also. To be compatible with CWSDPMI.
+- Function 50Ah removed, because it was dead code.
+
+
+Changes from 1.1 to 1.2:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- numerous bugs fixed that probably will have never showed up.
+- functions 0x00E,0x00F (get/set multiple descriptors) turned off.
+  These functions won't be used by DJGPP programs.
+- callback of int 24 turned off. Since CWSDPMI doesn't callback this
+  interrupt, PMODE/DJ needn't support it either. To turn it on you have to
+  rebuild PMODE/DJ, setting the appropiate option in the config section of
+  PMODE.ASM
+- Use of conventional memory as DPMI memory if extended memory is exhausted.
+- probably the last release of PMODE/DJ.
+
+Changes from 1.2 to 1.3:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- fixed bug which zeroed memory when running under another DPMI provider.
+  This caused PMODE/DJ programs running under CWSDPMI to trash it's code.
+- upgraded the stub loader code to 2.02 functionality and made it consistent
+  (as much as possible) with the stub loader code used by CWSDSTUB.
+- fixed several bugs in the stub with missing segment overrides, causing
+  variables to be stored in the wrong places.
+- added support for more than 64Mb of raw memory using extended BIOS functions.
+  If more than 64Mb is available the int 15 hook won't return the proper values.  
+- added support for more than 64Mb of XMS memory using extended XMS functions.
+- probably the last release of PMODE/DJ.
+
+-----------------------------------------------------------------------
+
+Differences between PMODE/DJ and the DPMI 0.90 specification:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- descriptors reside in the GDT.
+- no allocation of specific LDT descriptors, as descriptor reside in the
+  GDT. Function 0x00D was probably only put in for some old dosextenders.
+- no debug register support. (functions 0xB00h - 0xB03h)
+- Only int 0x23 is callbacked to protected mode. Int 0x1C isn't. If you
+  need the timer, hook the hardware irq instead.
+  PMODE/DJ handles int 0x24 itself (like CWSDPMI). If you really need it,
+  you have to get the sources and change a variable in the config section of
+  PMODE.ASM.
+- DPMI 1.0 error codes.
+- get/set multiple descriptors. (0x00E,0x00F) (turned off by default)
+- function 0x801. (free physical address mapping)
+- coprocessor functions. (0xE00,0xE01)
+- interrupts are off while executing int 31h functions.
+
+-----------------------------------------------------------------------
+
+Differences between PMODE/DJ and CWSDPMI:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- no virtual memory
+- no NULL pointer protection
+- no debug support
++ faster than CWSDPMI
++ smaller than CWSDPMI (in size and consumed DOS memory if not nested)
++ much smaller memory requirements in raw/XMS modes on large memory systems
++ comes in a ring-0 version which can be imbedded in the stub
+- does not support nesting (new version loaded for each task)
+
+------------------------------------------------------------------------
+
+Differences between PMODE/DJ and Tran's PMODE v3.07:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sad things first:-(
+- PMODE/DJ is bigger in size. (about 7K)
+- mode switching is a bit slower.
+- dos execute call hooked. The interrupt controller must be reset when
+  the application shells out.
+
+Happy things 2nd:-)
+- exception handling with no slowdown to the irq process.
+- dos memory allocation.
+- physical address mapping. (VBE 2.0!!)
+- dynamic allocation of pagetables at startup. You don't need to
+  increase the # of pagetables by yourself.
+- Use of folds, structs and macros.
+- Use of dos memory for DPMI memory.
+- A certain protected mode switch type can be forced or forbidden.
+- A 16 bit DPMI host is ignored. (No special error code)
+- Transparent hooking of real mode hardware interrupts.
+- DPMI function 002h added. (Segment to Selector)
+  The selector maximum is 16.
+- DPMI functions 100h-102h added. (DOS memory services)
+- DPMI functions 300h-302h rewritten.
+- DPMI function 50Ah removed.
+- DPMI functions 600h-603h,70xh added. They only clear the carry as PMODE/DJ
+  doesn't support virtual memory. (so far?)
+- callback code rewritten.
+- DPMI functions 202h-203h added. (Get/Set Exception vectors)
+  The standard exceptionhandler will only turn on the PC speaker.
+- error code 3 (DPMI host not 32bit) means now that PMODE/DJ has found
+  no way to switch into protected mode. Can only happen if some
+  switchtypes have been forbidden by the caller.
+- When using the raw mode switching routines, keep in mind that they use
+  some stack space on both the real mode and protected mode stacks.
+  Unlike the original PMODE it is possible now to use the same stack for
+  real and protected mode. (The stacks can still be different of course)
+- Int 23h and 24h are now callbacked to protected mode. Int 1Ch isn't still.
+  I don't see a real reason why.
+- Int 0,1,3-15 are all treated as fatal exceptions. (Like CWSDPMI treats
+  them). Int 2 (NMI) is passed down to real mode. (It wasn't that easy...)
+- returned DPMI version is 0.9.
+- Interrupts may be enabled in a callback. The selector in DS is still the
+  same for all callbacks, but it is a selector with a fixed base of zero.
+
+------------------------------------------------------------------------
+
+Still to do:
+~~~~~~~~~~~~
+
+- Int 0x24: If the flags say that fail is not possible, DOS will
+  terminate PMODE/DJ which will result in loss of extended memory and
+  probably in a system crash. Anyone any idea on how to get rid of this
+  problem?
+- Int 0x1c: Call back to PM if hooked
+
+------------------------------------------------------------------------
+
+Bugs (or strange things) found in PMODE v3.07:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+correct this text if they're not bugs.
+
+Bug 1:  VCPI installation check. Some EMS Memory Managers (e.g EMM386
+        V5.0) doesn't offer their VCPI interface when no EMS page is
+        allocated. Or is it possible then to switch into protected mode
+        by XMS?
+Bug 2:  Forgot to clear the carry at successful exit at pm_info!
+Bug 3:  On entry: If DS = SS, two selectors instead of one are created!
+Bug 4:  I am not sure, if the caller can modify or free the initial
+        cs, ds, and ss selectors in the original source
+Bug 5:  Not sure. At exit with int21, ah=4c, forgot to free the allocated
+        memoryblock at startup. Also forgot to restore A20 state.
+Bug 6:  When copying stack params in function 300h - 302h, you can see
+        'lea esi,[esp+36h-2]'. -2 is wrong, 36h is the correct stack
+        offset!
+Bug 7:  int31testaccess: code 'test cl,90h; jz... jpo...'
+        Is it illegal to clear the present bit of descriptors?
+        My DPMI doc says no!
+Bug 8:  int31testaccess: the test if codesegments are non-conform and
+        readable is wrong. It is possible to create a codesegment that
+        is non-conform but not readable!
+Bug 9:  After switching to protected mode, forgot to clear the TS bit
+        in CR0. This bit is set after a task-switch (the VCPI switch is
+        done via a task switch) and thus would cause an exception if a
+        program uses the copro!
+Bug 10: After raw mode switching to protected mode, forgot to set up
+        the taskregister and the local descriptor table. OK, in
+        PMODE v3.07 a task switch never happens, but in PMODE/DJ.
+        (This is why mode switching is bit slower in PMODE/DJ :(
+
+------------------------------------------------------------------------
+
+Minor differences between PMODE/DJ and DPMI:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(Some lines are copied from Tran's doc of PMODE v3.07. Do you mind, Tran? ;)
+
+) DPMI: IRET(D) and POPF(D) may not affect the interrupt flag. PUSHF(D)
+    may not store the interrupt flag.
+  PMODE/DJ: IRET(D) and POPF(D) affect the real interrupt flag.
+    PUSHF(D) stores the real interrupt flag.
+
+) In protected mode, ESP must always be the stack pointer. Meaning, even if
+  using a 16bit stack segment, the high word of ESP MUST be 0.
+
+) When calling the raw mode switching routine to switch into protected mode,
+  you must supply the full ESP and EIP. Even if the stack or code segments
+  being switched to are 16bit.
+
+) DPMI 1.0 will reload any segment registers for which the descriptor is
+  changed through an INT 31h function. PMODE/DJ reloads only ds,es,fs,gs,
+  but not ss. Both will zero the segment registers freed with function 0001h.
+  DPMI 0.9 may or may not.
+
+) Remember that DPMI 0.9 does not return error codes as DPMI 1.0/PMODE/DJ
+  do.
+
+) Under PMODE/DJ, the AVL bit of descriptors is used to keep track of
+  free and used descriptors. The value you pass for this bit when
+  setting descriptor access rights will be ignored.
+
+) When switching modes using the raw mode switching routines, make sure
+  there is some space on both stacks (real and protected). Specific DPMI
+  requirements may vary, but 32 bytes is enough for PMODE/DJ.
+
+) Under XMS an extra 15 bytes will be allocated for possible aligning of
+  the XMS memory block on a paragraph. Though an XMS block will probably
+  already be aligned on at least a paragraph boundary, this is not
+  defined in the XMS standard. And to keep the possibility of problems
+  at nil, this is done.
+
+) Be aware that memory allocation functions under XMS use real mode
+  calls and real mode stack space. If there is not enough stack space
+  for the call to the real mode XMS driver, error code 8010h
+  (resource unavailable) will be returned.
+
+) If an XMS memory lock fails, which is used in memory allocation
+  functions, error 8010h will be returned. A memory lock failure is not
+  due to memory not being available. But rather, some internal XMS crap.
+  But it should never happen anyway.
+
+) The raw system checks both INT 15h and the VDISK low to high extended
+  memory allocation scheme to get its available extended memory area.
+
+) The raw system allocates extended memory on an as-needed basis from
+  the top down. INT 15h function 88h is hooked and the total amount of
+  memory allocated using the kernel function 0501h is subtracted from
+  the amount of memory returned from the previous INT 15h handler. This
+  is so that you can execute other protected mode programs from within
+  your programs and they will have extended memory available (if you
+  left any).
+
+) A protected mode IRQ handler or real mode callback must return on the
+  same stack it was called with.
+
+) A real mode routine called with functions 0300h, 0301h, or 0302h must
+  return on the same stack it was called with.
+
+) You should make no assumptions about the low memory protected mode
+  data area needed by PMODE. It can range from very small to very large.
+  And if a DPMI host is present, it is unpredictable.
+
+) Make sure you do not access, read or write, extended memory outside
+  the blocks you allocate. Even if there is no physical memory there,
+  you will probably get exceptions under DPMI/VCPI.
+
+) When setting descriptor access rights, remember that the B bit of
+  stack descriptors determines whether PUSHes and POPs use SP (B=0) or
+  ESP (B=1).
+
+) The reserved field between EBP and EBX in the register structure used
+  during a callback is used by PMODE to preserve the high word of ESP
+  for real mode.
+
+) You should assume the INT 31h extended memory functions to be slow.
+  Especially under VCPI, where a call has to be made to the VCPI server
+  for each 4k of memory allocated or freed, and two calls for each 4k
+  verified.
+
+) Under PMODE/DJ, software INT redirection calls only pass back the
+  carry, parity, aux, zero, sign, and overflow flags from the real mode
+  interrupt handler.
+

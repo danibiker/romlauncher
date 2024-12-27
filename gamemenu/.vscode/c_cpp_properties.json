@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+               "${workspaceFolder}/**",
+               "${workspaceFolder}/src",
+                "/home/daniel/Apps/Develop/dos/djgpp/i586-pc-msdosdjgpp/sys-include",
+                "/home/daniel/Apps/Develop/dos/allegro/alpng13/src"
+            ],
+            "defines": ["DOS"],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,150 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "DOS DJGPP C/C++: compile gamemenu",
+			"command": "$DJBIN/i586-pc-msdosdjgpp-g++",
+			"args": [
+				"-O2", "-s", "-fpermissive",
+				"-DDOS",
+				"-I${workspaceFolder}/src",
+				"-I/home/daniel/Apps/Develop/dos/allegro-4.9.2/include",
+				"-I/home/daniel/Apps/Develop/dos/djgpp/i586-pc-msdosdjgpp/sys-include",
+				"-I/home/daniel/Apps/Develop/dos/djgpp/include",
+				"-L/home/daniel/Apps/Develop/dos/djgpp/lib",
+				"-L/home/daniel/Apps/Develop/dos/allegro-4.9.2/lib",
+				"${workspaceFolder}/src/utils/font/alfont.c",
+				"${workspaceFolder}/main.cpp",
+				"-o",
+				"${workspaceFolder}/gmenu/gamemenu.exe",
+				"-lalpng",
+				"-lalleg",
+				"-liconv",
+				"-lfreetype",
+				"-lpng",
+				"-lz"
+			],
+			"options": {
+				"cwd": "${fileDirname}",
+				"env": {
+                    "DJBIN": "/home/daniel/Apps/Develop/dos/djgpp/bin"
+                }
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: bin/i586-pc-msdosdjgpp-g++"
+		},
+		{
+			"type": "cppbuild",
+			"label": "BuildManager",
+			"command": "$DJBIN/i586-pc-msdosdjgpp-gcc",
+			"args": [
+				"-O2", "-s",
+				"-falign-functions=1",
+				"-falign-jumps=1",
+				"-falign-labels=1",
+				"-falign-loops=1",
+				"${workspaceFolder}/src/dosmenu.c",
+				"-o",
+				"${workspaceFolder}/gmenu/dosmenu.exe"
+			],
+			"options": {
+				"cwd": "${fileDirname}",
+				"env": {
+                    "DJBIN": "/home/daniel/Apps/Develop/dos/djgpp/bin"
+                }
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: bin/i586-pc-msdosdjgpp-gcc"
+		},
+		{
+			"type": "cppbuild",
+			"label": "DOS DJGPP: compile manager pmode",
+			"command": "$DJBIN/buildstubbed.sh",
+			"args": [
+				
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/pmode",
+				"env": {
+                    "DJBIN": "${workspaceFolder}/pmode"
+                }
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"dependsOn": ["BuildManager"]
+		},
+		{
+			"type": "cppbuild",
+			"label": "UNIX DJGPP C/C++: compile gamemenu",
+			"command": "/usr/bin/g++",
+			"args": [
+				"-g", "-Wall",
+				"-I${workspaceFolder}/src",
+				"-I/home/daniel/Apps/Develop/dos/allegro/alpng13/src",
+				"-I/usr/include/freetype2",
+				"-DUNIX",
+				"-L/usr/lib",
+				"-L/home/daniel/Apps/Develop/dos/allegro/alpng13/lib/unix",
+				"${workspaceFolder}/main.cpp",
+				"${workspaceFolder}/src/utils/font/alfont.c",
+				"-o",
+				"${workspaceFolder}/gmenu/gamemenu",
+				"-lalpng",
+				"-lalleg",
+				"-lfreetype",
+				//"-lpng",
+				//"-lz"
+				
+			],
+			"options": {
+				"cwd": "/usr/bin"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: bin/i586-pc-msdosdjgpp-g++"
+		}
+		/*,{
+			"type": "cppbuild",
+			"label": "BuildExjoy",
+			"command": "$DJBIN/i586-pc-msdosdjgpp-gcc",
+			"args": [
+				"-O2", "-s",
+				"-falign-functions=1",
+				"-falign-jumps=1",
+				"-falign-labels=1",
+				"-falign-loops=1",
+				"-I/home/daniel/Apps/Develop/dos/allegro-4.9.2/include",
+				"-I/home/daniel/Apps/Develop/dos/djgpp/i586-pc-msdosdjgpp/sys-include",
+				"-I/home/daniel/Apps/Develop/dos/djgpp/include",
+				"-L/home/daniel/Apps/Develop/dos/djgpp/lib",
+				"-L/home/daniel/Apps/Develop/dos/allegro-4.9.2/lib",
+				"${workspaceFolder}/exjoy.c",
+				"-o",
+				"${workspaceFolder}/gmenu/exjoy.exe",
+				"-lalleg"
+			],
+			"options": {
+				"cwd": "${fileDirname}",
+				"env": {
+                    "DJBIN": "/home/daniel/Apps/Develop/dos/djgpp/bin"
+                }
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: bin/i586-pc-msdosdjgpp-gcc"
+		}*/
+	]
+}
