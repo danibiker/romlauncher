@@ -14,7 +14,7 @@
 				"-I/home/daniel/Apps/Develop/dos/djgpp/include",
 				"-L/home/daniel/Apps/Develop/dos/djgpp/lib",
 				"-L/home/daniel/Apps/Develop/dos/allegro-4.9.2/lib",
-				"${workspaceFolder}/src/utils/font/alfont.c",
+				"${workspaceFolder}/src/utils/font/alfont.cpp",
 				"${workspaceFolder}/main.cpp",
 				"-o",
 				"${workspaceFolder}/gmenu/gamemenu.exe",
@@ -47,7 +47,7 @@
 				"-falign-jumps=1",
 				"-falign-labels=1",
 				"-falign-loops=1",
-				"${workspaceFolder}/src/dosmenu.c",
+				"${workspaceFolder}/src/dosmenu.cpp",
 				"-o",
 				"${workspaceFolder}/gmenu/dosmenu.exe"
 			],
@@ -65,7 +65,7 @@
 		},
 		{
 			"type": "cppbuild",
-			"label": "DOS DJGPP: compile manager pmode",
+			"label": "DOS DJGPP: compile dosmenu pmode",
 			"command": "$DJBIN/buildstubbed.sh",
 			"args": [
 				
@@ -95,7 +95,7 @@
 				"-L/usr/lib",
 				"-L/home/daniel/Apps/Develop/dos/allegro/alpng13/lib/unix",
 				"${workspaceFolder}/main.cpp",
-				"${workspaceFolder}/src/utils/font/alfont.c",
+				"${workspaceFolder}/src/utils/font/alfont.cpp",
 				"-o",
 				"${workspaceFolder}/gmenu/gamemenu",
 				"-lalpng",

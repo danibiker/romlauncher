@@ -54,7 +54,7 @@ int main(int argc, char *argv[]){
     fflush(fp);
     fclose(fp);
     */
-    
+
     const char* batFile = "/RUN.BAT";
     const char* menuFile = "/gamemenu.exe";
 
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]){
 
     while (showMenu){
         printf("launching the menu...\n");
-        
+
         //if (spawnl(P_WAIT, EXE_MENU, EXE_MENU, NULL) == -1) {
         //    perror("Failed to launch gamemenu.exe");
         //    pause();
@@ -98,9 +98,9 @@ int main(int argc, char *argv[]){
             perror("Failed to launch gamemenu.exe");
             return 1;
         }
-        
-        
-        if (showMenu = stat(BAT_FILE, &buf) == 0){
+
+
+        if ((showMenu = stat(BAT_FILE, &buf) == 0)){
             printf("launching the game...\n");
             //if (spawnl(P_WAIT, BAT_FILE, BAT_FILE, NULL) == -1) {
             if (system(BAT_FILE) != 0){
@@ -117,6 +117,6 @@ int main(int argc, char *argv[]){
     }
     free(BAT_FILE);
     free(EXE_MENU);
-    
+
     return 0;
 }

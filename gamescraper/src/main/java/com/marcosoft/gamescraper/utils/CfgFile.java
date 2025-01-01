@@ -12,7 +12,6 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -26,12 +25,10 @@ import com.marcosoft.gamescraper.beans.TabElementEmuCfg;
 public class CfgFile {
 	
 	private CfgFile() {
-    	Locale locale = Locale.getDefault();
-        rb = ResourceBundle.getBundle("messages", locale);
+        
 	}
 	
 	private static final Logger logger = Logger.getLogger(CfgFile.class.getName());
-	private static ResourceBundle rb;
 	
 	/**
 	 * 
@@ -100,6 +97,7 @@ public class CfgFile {
 	public static boolean saveConfig(File cfgFile, Object obj,  Map<String, TabElementEmuCfg> hashTabElements) {
 		boolean ret = false;
 		boolean fileCreated = true;
+		ResourceBundle rb = Utils.getDefaultOrFirstResourceBundle();
 		
 		File fileDir = new File(cfgFile.getParent());
 		if (!fileDir.exists() && !fileDir.mkdirs()) {

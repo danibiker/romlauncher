@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.HeadlessException;
@@ -28,12 +29,16 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,6 +51,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -168,6 +174,7 @@ public class App
 	JComboBox<ImgConversion> comboImgConv;
 	JComboBox<ScrapeLang> cmbLang;
 	JCheckBox chkMediaSize;
+	JLabel lblDownProgress;
 	//private final Map<Integer, IndexColorModel> colorModel = new HashMap<>();
 	ResourceBundle rb;
 	
@@ -352,6 +359,52 @@ public class App
 	    }
 	}
 	
+	/**
+	 * 
+	 * @param pathdir
+	 * @return
+	 */
+	public int loadCfgEmus(String pathdir) {
+		txtPrefix.setText(pathdir);
+		File dirCfg = new File(pathdir + File.separator + GMENU + File.separator + CONFIG);
+		File dirGmenu = new File(pathdir + File.separator + GMENU);
+		File fileCfg = new File(txtPrefix.getText() + File.separator + GMENU + File.separator + GMENU_CFG);
+		
+		if (!dirGmenu.exists() || !dirCfg.exists()) {
+			return 1;
+		} 
+		
+		if(dirGmenu.isDirectory() && CfgFile.loadConfig(fileCfg, cfgGeneral)) {
+			//Avoid writing the prefix with the data obtained by the config file. 
+			//It will be written ok when save and the chkConvert is selected
+			//txtPrefix.setText(cfgGeneral.getPath_prefix());
+			//Instead, write to txtDirReplaced
+			txtDirReplaced.setText(txtPrefix.getText());
+			String [] res = cfgGeneral.getResolution().trim().split(" ");
+			if (res.length > 0) txtW.setText(res[0]);
+			if (res.length > 1) txtH.setText(res[1]);
+			chkDebug.setSelected(cfgGeneral.isDebug());
+			chkConvert.setSelected(cfgGeneral.isConvert_enable());
+			txtDirToReplace.setText(cfgGeneral.getConvert_prefix_dst());
+			txtDirReplaced.setEnabled(chkConvert.isSelected());
+			txtDirToReplace.setEnabled(chkConvert.isSelected());
+			
+			if (dirCfg.exists() && dirCfg.isDirectory()) {
+				for (File file : dirCfg.listFiles(file -> file.getName().toLowerCase().endsWith(".cfg"))) {
+					ConfigEmu configEmu = new ConfigEmu();
+					CfgFile.loadConfig(file, configEmu);
+					String idemu = Utils.getFileNameWithoutExtension(file.getName());
+					mapEmus.put(idemu, configEmu);
+					addTabEmu(idemu);
+				}
+			}
+		} else {
+			return 2;
+		}
+		return 0;
+	}
+	
+	
     /**
      * 
      */
@@ -424,7 +477,7 @@ public class App
 		pnlGeneral.add(lblDirectorioPrefijo);
 		
 		txtPrefix = new JTextField();
-		txtPrefix.setText("/home/daniel/Apps/Juegos/dosbox/doshd/juegos/emu");
+		txtPrefix.setText("/home/daniel/Apps/Juegos/dosbox/doshd/juegos/emu2");
 		txtPrefix.setBounds(12, 85, 415, 25);
 		pnlGeneral.add(txtPrefix);
 		txtPrefix.setColumns(10);
@@ -437,15 +490,8 @@ public class App
 								
 				int returnVal = chooser.showOpenDialog(tabsMain);
 				if(returnVal == JFileChooser.APPROVE_OPTION) {
-					txtPrefix.setText(chooser.getSelectedFile().getAbsolutePath());
-					File dirCfg = new File(chooser.getSelectedFile().getAbsolutePath() 
-							+ File.separator + GMENU + File.separator + CONFIG);
-					File dirGmenu = new File(chooser.getSelectedFile().getAbsolutePath() 
-							+ File.separator + GMENU);
-					
-					File fileCfg = new File(txtPrefix.getText() + File.separator + GMENU + File.separator + GMENU_CFG);
-					
-					if (!dirGmenu.exists() || !dirCfg.exists()) {
+					int emusLoadRet = loadCfgEmus(chooser.getSelectedFile().getAbsolutePath());
+					if (emusLoadRet == 1) {
 						int result = JOptionPane.showConfirmDialog(frame, rb.getString("alert.createdir"), rb.getString("alert.title"),
 					               JOptionPane.YES_NO_OPTION,
 					               JOptionPane.QUESTION_MESSAGE);
@@ -456,41 +502,17 @@ public class App
 			            		JOptionPane.showMessageDialog(frame, rb.getString("alert.error.dircreation"));
 			            		return;
 			            	}
-			            	
 			            } 
 					} 
 					
-					if(dirGmenu.isDirectory() && CfgFile.loadConfig(fileCfg, cfgGeneral)) {
-						//Avoid writing the prefix with the data obtained by the config file. 
-						//It will be written ok when save and the chkConvert is selected
-						//txtPrefix.setText(cfgGeneral.getPath_prefix());
-						//Instead, write to txtDirReplaced
-						txtDirReplaced.setText(txtPrefix.getText());
-						String [] res = cfgGeneral.getResolution().trim().split(" ");
-						if (res.length > 0) txtW.setText(res[0]);
-						if (res.length > 1) txtH.setText(res[1]);
-						chkDebug.setSelected(cfgGeneral.isDebug());
-						chkConvert.setSelected(cfgGeneral.isConvert_enable());
-						txtDirToReplace.setText(cfgGeneral.getConvert_prefix_dst());
-						txtDirReplaced.setEnabled(chkConvert.isSelected());
-						txtDirToReplace.setEnabled(chkConvert.isSelected());
-						
-						if (dirCfg.exists() && dirCfg.isDirectory()) {
-							for (File file : dirCfg.listFiles(file -> file.getName().toLowerCase().endsWith(".cfg"))) {
-								ConfigEmu configEmu = new ConfigEmu();
-								CfgFile.loadConfig(file, configEmu);
-								String idemu = Utils.getFileNameWithoutExtension(file.getName());
-								mapEmus.put(idemu, configEmu);
-								addTabEmu(idemu);
-							}
-						}
-					} else {
+					if (emusLoadRet == 2) {
+						File dirGmenu = new File(chooser.getSelectedFile().getAbsolutePath() + File.separator + GMENU);
+						File fileCfg = new File(txtPrefix.getText() + File.separator + GMENU + File.separator + GMENU_CFG);
 						if (dirGmenu.isDirectory()) {
 							JOptionPane.showMessageDialog(frame, rb.getString("alert.error.filenotfound") + fileCfg);
 						} else {
 							JOptionPane.showMessageDialog(frame, rb.getString("alert.error.dirnotselected") + dirGmenu.getAbsolutePath());
 						}
-						
 					}
 				}
 		});
@@ -628,7 +650,7 @@ public class App
 		panel_3.setLayout(null);
 		
 		
-		JLabel lblDownProgress = new JLabel(rb.getString("lbl.media.progress"));
+		lblDownProgress = new JLabel(rb.getString("lbl.media.progress"));
 		lblDownProgress.setBounds(4, 5, 350, 24);
 		panel_3.add(lblDownProgress);
 		lblDownProgress.setFont(new Font("Dialog", Font.BOLD, 20));
@@ -775,55 +797,49 @@ public class App
 		JLabel lblNewLabel = new JLabel(rb.getString("lbl.download.lang"));
 		lblNewLabel.setBounds(192, 15, 151, 15);
 		pnlScrapper.add(lblNewLabel);
+		
+		//auto loading the configuration if there is any
+		Path cwd = Path.of("").toAbsolutePath();
+		int posPrevDir = cwd.toString().indexOf(File.separator + GMENU);
+		if (posPrevDir > 0) {
+			String parentDir = cwd.toString().substring(0, posPrevDir);
+			loadCfgEmus(parentDir);
+		}
     }
+    
+
     
     /**
      * 
      */
 	private void findTextResources() {
-		Locale locale = Locale.getDefault();
-		
-    	try {
-    		rb = ResourceBundle.getBundle("messages", locale);
-    	} catch (MissingResourceException e) {
-    		String [] localesStr = {"en","es"};
-        	boolean localeFound = false;
-        	int i=0;
-    		do {
-    			try {
-					rb = ResourceBundle.getBundle("messages", Locale.forLanguageTag(localesStr[i]));
-					localeFound = true;
-				} catch (MissingResourceException e1) {
-					localeFound = false;
-				}
-    			i++;
-        	} while (!localeFound && i < localesStr.length);
+		rb = Utils.getDefaultOrFirstResourceBundle();
+    	if (rb != null) {
+    		hashTabElements = new HashMap<>() {
+        		private static final long serialVersionUID = 1504460359215851058L;
+        		{
+        			put("name", new TabElementEmuCfg(rb.getString("emu.name"),rb.getString("emu.name.tip"), false));
+        			put("description", new TabElementEmuCfg(rb.getString("emu.desc"),rb.getString("emu.desc.tip"), false));
+        			put(DIRECTORY, new TabElementEmuCfg(rb.getString("emu.dir"),rb.getString("emu.dir.tip"), true));
+        			put(EXECUTABLE, new TabElementEmuCfg(rb.getString("emu.exec"),rb.getString("emu.exec.tip"), true));
+        			put("global_options", new TabElementEmuCfg(rb.getString("emu.opt"),rb.getString("emu.opt.tip"), false));
+        			put("options_before_rom", new TabElementEmuCfg(rb.getString("emu.optbef"),rb.getString("emu.optbef.tip"), false));
+        			put("use_rom_file", new TabElementEmuCfg(rb.getString("emu.chkromfile"),rb.getString("emu.chkromfile.tip"), false));
+        			put(MAP_FILE, new TabElementEmuCfg(rb.getString("emu.romfile"),rb.getString("emu.romfile.tip"), true));
+        			put(ASSETS, new TabElementEmuCfg(rb.getString("emu.assets"),rb.getString("emu.assets.tip"), true));
+        			put(SCREEN_SHOT_DIRECTORY, new TabElementEmuCfg(rb.getString("emu.sshot"),rb.getString("emu.sshot.tip"), true));
+        			put(USE_ROM_DIRECTORY, new TabElementEmuCfg(rb.getString("emu.chkromdir"),rb.getString("emu.chkromdir.tip"), false));
+        			put(ROM_DIRECTORY, new TabElementEmuCfg(rb.getString("emu.romdir"),rb.getString("emu.romdir.tip"), true));
+        			put(ROM_EXTENSION, new TabElementEmuCfg(rb.getString("emu.ext"),rb.getString("emu.ext.tip"), false));
+        			put(USE_EXTENSION, new TabElementEmuCfg(rb.getString("emu.chkext"),rb.getString("emu.chkext.tip"), false));
+        			put(SYSTEM, new TabElementEmuCfg("Sistema","Sistema emulado", false));
+        			
+        			this.get(SCREEN_SHOT_DIRECTORY).setVisible(false);
+        			this.get(SYSTEM).setListSelector(true);
+        			this.get(MAP_FILE).setMapBtn(true);
+        		}
+        	};
     	}
-    	
-    	hashTabElements = new HashMap<>() {
-    		private static final long serialVersionUID = 1504460359215851058L;
-    		{
-    			put("name", new TabElementEmuCfg(rb.getString("emu.name"),rb.getString("emu.name.tip"), false));
-    			put("description", new TabElementEmuCfg(rb.getString("emu.desc"),rb.getString("emu.desc.tip"), false));
-    			put(DIRECTORY, new TabElementEmuCfg(rb.getString("emu.dir"),rb.getString("emu.dir.tip"), true));
-    			put(EXECUTABLE, new TabElementEmuCfg(rb.getString("emu.exec"),rb.getString("emu.exec.tip"), true));
-    			put("global_options", new TabElementEmuCfg(rb.getString("emu.opt"),rb.getString("emu.opt.tip"), false));
-    			put("options_before_rom", new TabElementEmuCfg(rb.getString("emu.optbef"),rb.getString("emu.optbef.tip"), false));
-    			put("use_rom_file", new TabElementEmuCfg(rb.getString("emu.chkromfile"),rb.getString("emu.chkromfile.tip"), false));
-    			put(MAP_FILE, new TabElementEmuCfg(rb.getString("emu.romfile"),rb.getString("emu.romfile.tip"), true));
-    			put(ASSETS, new TabElementEmuCfg(rb.getString("emu.assets"),rb.getString("emu.assets.tip"), true));
-    			put(SCREEN_SHOT_DIRECTORY, new TabElementEmuCfg(rb.getString("emu.sshot"),rb.getString("emu.sshot.tip"), true));
-    			put(USE_ROM_DIRECTORY, new TabElementEmuCfg(rb.getString("emu.chkromdir"),rb.getString("emu.chkromdir.tip"), false));
-    			put(ROM_DIRECTORY, new TabElementEmuCfg(rb.getString("emu.romdir"),rb.getString("emu.romdir.tip"), true));
-    			put(ROM_EXTENSION, new TabElementEmuCfg(rb.getString("emu.ext"),rb.getString("emu.ext.tip"), false));
-    			put(USE_EXTENSION, new TabElementEmuCfg(rb.getString("emu.chkext"),rb.getString("emu.chkext.tip"), false));
-    			put(SYSTEM, new TabElementEmuCfg("Sistema","Sistema emulado", false));
-    			
-    			this.get(SCREEN_SHOT_DIRECTORY).setVisible(false);
-    			this.get(SYSTEM).setListSelector(true);
-    			this.get(MAP_FILE).setMapBtn(true);
-    		}
-    	};
 	}
     
     /**
@@ -928,6 +944,9 @@ public class App
         	return executor.getPoolSize();
         }
         
+
+    	
+        
         public int queueSize() {
             //return (int)executor.getTaskCount();
             int activeCount = executor.getActiveCount();
@@ -949,7 +968,7 @@ public class App
 
         	try {
         		final int totalRomsToDownload = getTotalRomsToDownload();
-
+        		lblDownProgress.setText(rb.getString("lbl.media.progress"));
         		
         		Map<String, String> hashAssetsDir = new HashMap<>();
         		hashAssetsDir.put(SS, Utils.getAbsolutePath(cfgEmu.getAssets() + File.separator + DIR_SNAP, txtPrefix.getText()));
@@ -995,7 +1014,7 @@ public class App
     				
     				uriBuilder.addParameter("systemeid", gameSystem.getId().toString());
     				uriBuilder.addParameter("romtype", "rom");
-    				uriBuilder.addParameter("romnom", gameSystem.getId() == MAME_SYS_ID ? name : rom.longFileName);
+    				uriBuilder.addParameter("romnom", gameSystem.getId() == MAME_SYS_ID ? name : rom.longFileName.replace("\"", ""));
     				logger.log(Level.FINE, String.format("searching rom %s; url: %s", rom.longFileName, uriBuilder.toString()) );
     				
     				HttpUtil httpUtil = new HttpUtil();
@@ -1040,9 +1059,23 @@ public class App
     					httpUtil.closeDataReceived();
     				}
     			}
+    			
+    			int counts = 0;
+                while (!executor.isTerminated() && counts < 10) {
+                	TimeUnit.SECONDS.sleep(1);
+                	counts++;
+                }
+                
     		} catch (IOException | URISyntaxException e) {
     			logger.log(Level.SEVERE, String.format("Error findRomsSS: %s for url %s", e.getMessage(), uriBuilder.toString()));
-    		} 
+    		} catch (InterruptedException e) {
+    			logger.log(Level.SEVERE, String.format("InterruptedException while waiting: %s", e.getMessage()));
+    			Thread.currentThread().interrupt();
+			} 
+        	
+            lblDescargandoRecurso.setText(String.format(rb.getString("lbl.media.downloaded"), executor.getCompletedTaskCount()));
+        	lblDownTotalRoms.setText("");
+        	lblDownProgress.setText(rb.getString("lbl.media.progress.end"));
         }
     }
     
@@ -1626,11 +1659,22 @@ public class App
 						JButton btn = new JButton();
 						btn.setBounds(x + fieldW + 20 + 25, y, 25, 25);
 						BufferedImage image;
-						image = ImageIO.read(new File("src/main/resources/img/Msdos.png"));
-						Image scaledImage = image.getScaledInstance(btn.getWidth(), btn.getHeight(), java.awt.Image.SCALE_SMOOTH);
-						iconMsDos = new ImageIcon(scaledImage);
-						btn.setIcon(iconMsDos);
+						InputStream icoStream = Utils.loadResource("img/Msdos.png");
+						if (icoStream != null) {
+							try {
+								image = ImageIO.read(icoStream);
+								Image scaledImage = image.getScaledInstance(btn.getWidth(), btn.getHeight(), java.awt.Image.SCALE_SMOOTH);
+								iconMsDos = new ImageIcon(scaledImage);
+								btn.setIcon(iconMsDos);
+							} catch (IOException e) {
+								logger.warning("Could not load an msdos icon");
+							}
+						}
+						
 						btn.setToolTipText(rb.getString("lbl.mapping"));
+						btn.setMinimumSize(new Dimension(25,25));
+						btn.setPreferredSize(new Dimension(25,25));
+						btn.setSize(new Dimension(25,25));
 						newPanel.add(btn);
 						btn.addActionListener( e -> {
 							generateMapRoms(txt, emuId);
@@ -1644,7 +1688,7 @@ public class App
 					chk.setToolTipText(infoEmuCfg.getHelp());
 					newPanel.add(chk);
 				}
-			} catch (SecurityException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | IOException e) {
+			} catch (SecurityException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException e) {
 				logger.log(Level.SEVERE, "Error adding components", e);
 			} 
         }
@@ -1968,6 +2012,8 @@ public class App
 					String title = mameMap.get(archivo.getShortFN());
 					if (title != null && !title.isEmpty()){
 						writer.write(archivo.getShortFN() + " \"" + title + "\"" + newLine);
+					} else {
+						writer.write(archivo.getShortFN() + " \"" + archivo.getShortFN() + "\"" + newLine);
 					}
 				}
 				JOptionPane.showMessageDialog(frame, String.format(rb.getString("alert.filesavedon"), cfgEmuDir.getAbsolutePath()));
@@ -2025,9 +2071,22 @@ public class App
 				listOfAddedElems.add(entry.getValue().getSystem());
 			}
 		}
-
+		sortModel(listModel);
 		listSystemsToScrap.setModel(listModel);
 		btnBuscar.setEnabled(listModel.size() > 0);
+	}
+	
+	private void sortModel(DefaultListModel<ScrapSystem> model) {
+	    List<ScrapSystem> list = new ArrayList<>();
+	    for (int i = 0; i < model.size(); i++) {
+	        list.add(model.get(i));
+	    }
+	    Collections.sort(list, (e1, e2) -> e1.getName().compareTo(e2.getName()));
+	    
+	    model.removeAllElements();
+	    for (ScrapSystem s : list) {
+	        model.addElement(s);
+	    }
 	}
 	
 	/**

@@ -169,12 +169,12 @@ void GameMenu::createMenuImages(ListMenu &listMenu){
  */
 void GameMenu::refreshScreen(ListMenu &listMenu){
     ConfigEmu emu = this->configEmus.at(this->emuCfgPos);
+    //Drawing the emulator name
+    ALFONT_FONT *fontBig = Fonts::getFont(Fonts::FONTBIG);
 
     //Drawing the rest of list and images
     if (listMenu.getNumGames() > (size_t)listMenu.curPos){
         auto game = listMenu.listGames.at(listMenu.curPos).get();
-        //Drawing the emulator name
-        ALFONT_FONT *fontBig = Fonts::getFont(Fonts::FONTBIG);
         
         if (!game->shortFileName.empty()){
             if (listMenu.layout == LAYBOXES) {
@@ -182,15 +182,7 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
                     this->getWidth() / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , textColor, -1);
                 
                 static const int menuBars = makecol(128, 128, 128);
-                //Top left line
-                //fastline(this->video_page, listMenu.marginX, listMenu.marginY, listMenu.getW(), listMenu.marginY, menuBars);
-                //Top Right
-                //fastline(this->video_page, listMenu.getW() + 1, listMenu.marginY, SCREEN_W  - listMenu.marginX, listMenu.marginY, menuBars);
-                //Vertical separator 
-                //fastline(this->video_page, listMenu.getW() + 1, listMenu.marginY, listMenu.getW() + 1, listMenu.marginY + listMenu.getH(), menuBars);
                 fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1 , SCREEN_W - listMenu.marginX, listMenu.marginY - 1, menuBars);
-
-                //Draw the menu element before the images and text
                 listMenu.draw(this->video_page);
 
                 //Draw and update the screen because the loading of images can take a long time
@@ -226,9 +218,7 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
                     menuImages[SNAPTIT].printImage(this->video_page);
                     menuTextAreas[SYNOPSIS].draw(this->video_page, this->gameTicks);
                 }
-                //Top Right
-                //fastline(this->video_page, listMenu.getW() + 1, listMenu.marginY, SCREEN_W  - listMenu.marginX, listMenu.marginY, menuBars);
-                //fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1 , SCREEN_W - listMenu.marginX, listMenu.marginY - 1, menuBars);
+
             } else if (listMenu.layout == LAYSIMPLE) {
                 if (listMenu.keyUp){
                     //Snapshot picture
@@ -241,6 +231,7 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
                     this->getWidth() / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , textColor, -1);
                 fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1, listMenu.getW(), listMenu.marginY - 1, textColor);
                 listMenu.draw(this->video_page);
+
             } else if (listMenu.layout == LAYTEXT) {
                 alfont_textout_centre_ex(this->video_page, fontBig, emu.name.c_str(), 
                     this->getWidth() / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , textColor, -1);
@@ -249,10 +240,16 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
             }
         }
 
+    } else if (listMenu.getNumGames() == 0){
+        alfont_textout_centre_ex(this->video_page, fontBig, emu.name.c_str(), 
+            this->getWidth() / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , textColor, -1);
+        fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1 , SCREEN_W - listMenu.marginX, listMenu.marginY - 1, textColor);
+        textout_centre_ex(this->video_page, font, "No roms found", SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
+        
     } else {
-        textout_centre_ex(this->video_page, font, "The configuration for the emulator is not valid", SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
+        textout_centre_ex(this->video_page, font, "The configuration is not valid", SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
         textout_centre_ex(this->video_page, font, "Press TAB to select the next entry or", SCREEN_W / 2, SCREEN_H / 2 + font->height + 3, textColor, -1);
-        textout_centre_ex(this->video_page, font, "Press ESC to exit and configure it properly", SCREEN_W / 2, SCREEN_H / 2 + (font->height + 3) * 2, textColor, -1);
+        textout_centre_ex(this->video_page, font, "Press ESC to exit", SCREEN_W / 2, SCREEN_H / 2 + (font->height + 3) * 2, textColor, -1);
     }
 }
 
@@ -461,7 +458,7 @@ void GameMenu::loadEmuCfg(ListMenu &menuData){
         ConfigEmu emu = this->configEmus.at(this->emuCfgPos);
         string mapfilepath = getPathPrefix(emu.rom_directory);
 
-        if (configMain.debug || files.size() == 0){
+        if (configMain.debug){
             clear_to_color(screen, backgroundColor);
             string msg = "roms found: " + Constant::TipoToStr(files.size()); 
             string msg2 = "In dir " + mapfilepath;

@@ -275,9 +275,9 @@ class ListMenu : public Object{
             /*To go to the init of the list*/
             this->iniPos = 0;
             this->curPos = 0;
-            this->endPos = (int)this->listGames.size() > this->maxLines ? this->maxLines : this->listGames.size() - 1;
+            this->endPos = (int)this->listGames.size() > this->maxLines ? this->maxLines : this->listGames.size();
             this->pixelShift = 0;
-            this->lastSel = 0;
+            this->lastSel = -1;
         }
 
         void nextPos(){
@@ -290,7 +290,7 @@ class ListMenu : public Object{
                     this->endPos++;
                 }
                 this->pixelShift = 0;
-                this->lastSel = 0;
+                this->lastSel = -1;
             }
         }
 
@@ -302,7 +302,7 @@ class ListMenu : public Object{
                     this->endPos--;
                 }
                 this->pixelShift = 0;
-                this->lastSel = 0;
+                this->lastSel = -1;
             }
         }
 
