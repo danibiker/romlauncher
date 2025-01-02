@@ -63,7 +63,7 @@ tar xf djgpp-linux64-gcc1220.tar.bz2 -C ~/dosdev
 
     - Extract allegro-dev-djgpp-gcc-4.9.2.tar.bz2 into a directory
 ```
-mkdir -p ~/dosdev/allegro-4.9.2<br>
+mkdir -p ~/dosdev/allegro-4.9.2
 tar -xf allegro-dev-djgpp-gcc-4.9.2.tar.bz2 -C ~/dosdev/allegro-4.9.2
 ```
 
