@@ -1,10 +1,10 @@
 #pragma once
 
+//Not needed
+//#ifdef DOS
+//    #include <allegro/platform/aldos.h>
+//#endif
 #include <allegro.h>
-#ifdef DOS
-    #include <allegro/platform/aldos.h>
-#endif
-
 #include <utils/const/Constant.h>
 
 #include <iostream>

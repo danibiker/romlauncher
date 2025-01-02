@@ -6,7 +6,7 @@
 			"label": "DOS DJGPP C/C++: compile gamemenu",
 			"command": "$DJBIN/i586-pc-msdosdjgpp-g++",
 			"args": [
-				"-O2", "-s", "-fpermissive",
+				"-O2", "-s", "-Wall",
 				"-DDOS",
 				"-I${workspaceFolder}/src",
 				"-I/home/daniel/Apps/Develop/dos/allegro-4.9.2/include",
@@ -88,10 +88,10 @@
 			"command": "/usr/bin/g++",
 			"args": [
 				"-g", "-Wall",
+				"-DUNIX",
 				"-I${workspaceFolder}/src",
 				"-I/home/daniel/Apps/Develop/dos/allegro/alpng13/src",
 				"-I/usr/include/freetype2",
-				"-DUNIX",
 				"-L/usr/lib",
 				"-L/home/daniel/Apps/Develop/dos/allegro/alpng13/lib/unix",
 				"${workspaceFolder}/main.cpp",

@@ -50,6 +50,11 @@ Temporary Items
 gamescraper/target
 obj
 bin
+gamemenu/dep/*.zip
+gamemenu/dep/*.gz
+gamemenu/dep/*.bz2
+gamemenu/dep/dosdev
+gamemenu/dep/freetype*
 #maven
 .mvn/
 HELP.md
