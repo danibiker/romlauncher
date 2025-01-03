@@ -1,6 +1,8 @@
 #pragma once
 
 #include "utils/const/Constant.h"
+#include "utils/beans/structures.h"
+#include "utils/io/dirutil.h"
 
 #include <string>
 #include <sstream>
@@ -48,7 +50,7 @@ class CfgLoader{
         void loadMainConfig(){
             dirutil dir;
 
-            string filepath = Constant::getAppDir() + string(tempFileSep) + CONFIGFILE;
+            string filepath = Constant::getAppDir() + string(Constant::tempFileSep) + CONFIGFILE;
 
             //if (dir.fileExists(filepath.c_str()) && !dir.isDir(filepath.c_str())){
                 fstream emucfg;
@@ -99,8 +101,8 @@ class CfgLoader{
         void loadEmuConfig(string emuname){
             ConfigEmu cfgEmu;
             dirutil dir;
-            string strFilepath = Constant::getAppDir() + string(tempFileSep)
-                + "config" + string(tempFileSep) + emuname + ".cfg";
+            string strFilepath = Constant::getAppDir() + string(Constant::tempFileSep)
+                + "config" + string(Constant::tempFileSep) + emuname + ".cfg";
             const char *filepath = strFilepath.c_str();
 
             if (configMain.debug) cout << " " << emuname << flush;

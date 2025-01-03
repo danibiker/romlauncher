@@ -1,4 +1,5 @@
-#pragma once 
+#ifndef FONTS
+#define FONTS
 
 #include <vector>
 #include <string>
@@ -26,8 +27,9 @@ class Fonts{
          * 
          */
         static void exit(){
-            for (int i=0; i < 2; i++) {
+            for (unsigned int i=0; i < 2; i++){
                 alfont_destroy_font(vFonts[i]);
+                vFonts[i] = NULL;
             }
             alfont_exit();
         }
@@ -41,6 +43,7 @@ class Fonts{
                 
             string fontRouteBig = fontRoute + (fontSize > 16 ? "cour.ttf" : "Unibody.ttf");
             ALFONT_FONT * fontloaded = alfont_load_font(fontRouteBig.c_str());
+
             if (fontloaded != NULL){
                 alfont_set_font_size(fontloaded, fontSize <= 16 ? 12 : fontSize);
                 if (vFonts[FONTBIG] != NULL){
@@ -92,4 +95,5 @@ class Fonts{
         static const int fsmall = 10;
 };
 
-ALFONT_FONT * Fonts::vFonts[2];
+#endif
+

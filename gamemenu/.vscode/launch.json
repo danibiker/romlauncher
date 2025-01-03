@@ -29,7 +29,7 @@
                 }
             ],
             //Launch for LINUX
-            "preLaunchTask": "UNIX DJGPP C/C++: compile gamemenu"
+            "preLaunchTask": "UNIX C/C++: compile gamemenu"
             //Launch for Windows
             //"preLaunchTask": "WINDOWS DJGPP C/C++: compile gamemenu"
         }

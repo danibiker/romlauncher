@@ -196,8 +196,8 @@ class TextArea : public Object{
             do{
                 string line = lines.at(i + this->lastScroll);
                 //textout_justify_ex(video_page, font, line.c_str(), this->getX(), this->getX() + this->getW() -1,
-                //    nextLineY - pixelDesp, this->getW() / 3, textColor, -1);
-                alfont_textout_ex(video_page, fontSmall, line.c_str(), this->getX(), nextLineY - pixelDesp, textColor, -1);
+                //    nextLineY - pixelDesp, this->getW() / 3, Constant::textColor, -1);
+                alfont_textout_ex(video_page, fontSmall, line.c_str(), this->getX(), nextLineY - pixelDesp, Constant::textColor, -1);
                 nextLineY = this->getY() + marginTop + (++i) * (fontSmall->face_h + lineSpace);
             } while ((size_t) (i + this->lastScroll) < lines.size() && nextLineY < this->getY() + this->getH() - fontSmall->face_h);
         }
@@ -218,7 +218,7 @@ class TextArea : public Object{
             //do{
             //    string line = lines.at(i);
             //    textout_justify_ex(video_page, font, line.c_str(), this->getX(), this->getX() + this->getW() -1,
-            //        nextLineY, this->getW() / 3, textColor, -1);
+            //        nextLineY, this->getW() / 3, Constant::textColor, -1);
             //    nextLineY = this->getY() + marginTop + (++i) * (fontSmall->face_h + lineSpace);
             //} while (i < lines.size() && nextLineY < this->getY() + this->getH() - fontSmall->face_h);
         }

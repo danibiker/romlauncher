@@ -250,7 +250,7 @@ class ListMenu : public Object{
                 //if the download was in dos and we want to use another Operating System
                 //but not having to download all again
                 vector<string> v = Constant::splitChar(emu.system, '_');
-                if (v.size() > 0 && MAME_SYS_ID.compare(v.at(0)) != 0){
+                if (v.size() > 0 && Constant::MAME_SYS_ID.compare(v.at(0)) != 0){
                     //For mame there is no need, because names are already short
                     DosNames dosnames;
                     dosnames.convertirNombresCortos(this->listGames);

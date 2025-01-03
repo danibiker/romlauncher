@@ -69,7 +69,7 @@ class Image : public Object{
                     if (this->drawfaded){
                         //Setting translucency effect
                         if (get_color_depth() == 8)
-                            color_map = &global_trans_table;
+                            color_map = &Constant::global_trans_table;
                         else
                             set_trans_blender(128, 128, 128, 160);
 

@@ -235,8 +235,8 @@ unsigned int dirutil::listarFilesSuperFast(const char *strdir, vector<unique_ptr
     string parentDir = strdir;
     //Miramos a ver si el directorio a explorar tiene una / al final
     if (strdir != NULL){
-        if (!parentDir.empty() && parentDir.at(parentDir.length()-1) != FILE_SEPARATOR){
-            parentDir.append(tempFileSep);
+        if (!parentDir.empty() && parentDir.at(parentDir.length()-1) != Constant::FILE_SEPARATOR){
+            parentDir.append(Constant::tempFileSep);
         }
         string extension;
 
@@ -277,9 +277,9 @@ string dirutil::getFileNameNoExt(string file){
     } else {
         size_t found, foundExt;
         
-        char sep = FILE_SEPARATOR;
-        if (file.find(sep) == string::npos && file.find(FILE_SEPARATOR_UNIX) != string::npos){
-            sep = FILE_SEPARATOR_UNIX;
+        char sep = Constant::FILE_SEPARATOR;
+        if (file.find(sep) == string::npos && file.find(Constant::FILE_SEPARATOR_UNIX) != string::npos){
+            sep = Constant::FILE_SEPARATOR_UNIX;
         } else if (file.find(sep) == string::npos && file.find(0x5C) != string::npos){
             sep = 0x5C;
         }
@@ -312,9 +312,9 @@ string dirutil::getFolder(string file){
     } else {
         size_t found;
 
-        char sep = FILE_SEPARATOR;
-        if (file.find(sep) == string::npos && file.find(FILE_SEPARATOR_UNIX) != string::npos){
-            sep = FILE_SEPARATOR_UNIX;
+        char sep = Constant::FILE_SEPARATOR;
+        if (file.find(sep) == string::npos && file.find(Constant::FILE_SEPARATOR_UNIX) != string::npos){
+            sep = Constant::FILE_SEPARATOR_UNIX;
         } else if (file.find(sep) == string::npos && file.find(0x5C) != string::npos){
             sep = 0x5C;
         }
@@ -337,9 +337,9 @@ string dirutil::getFileName(string file){
     } else {
         size_t found;
 
-        char sep = FILE_SEPARATOR;
-        if (file.find(sep) == string::npos && file.find(FILE_SEPARATOR_UNIX) != string::npos){
-            sep = FILE_SEPARATOR_UNIX;
+        char sep = Constant::FILE_SEPARATOR;
+        if (file.find(sep) == string::npos && file.find(Constant::FILE_SEPARATOR_UNIX) != string::npos){
+            sep = Constant::FILE_SEPARATOR_UNIX;
         } else if (file.find(sep) == string::npos && file.find(0x5C) != string::npos){
             sep = 0x5C;
         }

@@ -84,7 +84,7 @@
 		},
 		{
 			"type": "cppbuild",
-			"label": "UNIX DJGPP C/C++: compile gamemenu",
+			"label": "UNIX C/C++: compile gamemenu",
 			"command": "/usr/bin/g++",
 			"args": [
 				"-g", "-Wall",

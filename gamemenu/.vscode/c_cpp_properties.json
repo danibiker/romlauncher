@@ -5,10 +5,10 @@
             "includePath": [
                "${workspaceFolder}/**",
                "${workspaceFolder}/src",
-                "/home/daniel/Apps/Develop/dos/djgpp/i586-pc-msdosdjgpp/sys-include",
-                "/home/daniel/Apps/Develop/dos/allegro/alpng13/src"
+                //"/home/daniel/Apps/Develop/dos/djgpp/i586-pc-msdosdjgpp/sys-include",
+                "${workspaceFolder}/dep/dosdev/unix/alpng13/src"
             ],
-            "defines": ["DOS"],
+            "defines": ["UNIX"],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c17",
             "cppStandard": "c++17",

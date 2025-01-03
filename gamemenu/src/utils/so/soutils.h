@@ -23,12 +23,12 @@ string SOUtils::iniciarSistema(char** argv){
     string appDir = argv[0];
     size_t pos = appDir.rfind(Constant::getFileSep());
     if (pos == string::npos){
-        pos = appDir.rfind(FILE_SEPARATOR_UNIX);
+        pos = appDir.rfind(Constant::FILE_SEPARATOR_UNIX);
         #if defined(WIN) || defined(DOS)
             appDir = Constant::replaceAll(appDir, "/", "\\");
         #elif UNIX
-            FILE_SEPARATOR = FILE_SEPARATOR_UNIX;
-            tempFileSep[0] = FILE_SEPARATOR_UNIX;
+            Constant::FILE_SEPARATOR = Constant::FILE_SEPARATOR_UNIX;
+            Constant::tempFileSep[0] = Constant::FILE_SEPARATOR_UNIX;
         #endif
     }
     appDir = appDir.substr(0, pos);

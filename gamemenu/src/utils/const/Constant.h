@@ -10,21 +10,7 @@
 
 using namespace std;
 
-//Dependientes del sistema
-static const char FILE_SEPARATOR_UNIX = '/';
 
-#if defined(WIN) || defined(DOS)
-    static char FILE_SEPARATOR = 0x5C; //Separador de directorios para win32
-#elif UNIX
-    static char FILE_SEPARATOR = FILE_SEPARATOR_UNIX; //Separador de directorios para unix
-#endif
-
-static char tempFileSep[2] = {FILE_SEPARATOR,'\0'};
-static const string WHITESPACE = " \n\r\t";
-static int backgroundColor = makecol(0, 0, 0);
-static int textColor = makecol(255, 255, 255);
-static COLOR_MAP global_trans_table;
-static const string MAME_SYS_ID = "75";
 const int maxFps = 30;
 const int bkgSpeedPixPerS = 15;
 const float maxFrameTime = 1000.0 / maxFps;
@@ -65,6 +51,17 @@ class Constant{
         static void setAppDir(string var){
             appDir = var;
         }
+
+        static char FILE_SEPARATOR;
+        static char tempFileSep[2];
+        static const string WHITESPACE;
+        //Dependientes del sistema
+        static const char FILE_SEPARATOR_UNIX;
+        static const string MAME_SYS_ID;
+        static int backgroundColor;
+        static int textColor;
+        static COLOR_MAP global_trans_table;
+        static volatile uint32_t totalTicks;
 
         /**
         * Obtiene el separador de directorios de windows o unix
@@ -157,7 +154,6 @@ class Constant{
 
         static void setExecMethod(int var){EXEC_METHOD = var;}
         static int getExecMethod(){return EXEC_METHOD;}
-        static volatile uint32_t totalTicks;
 
         //Obtains the milliseconds since the application start
         static uint32_t getTicks(){
@@ -165,6 +161,9 @@ class Constant{
         }
 
         static void drawText(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int y, int color, int bg){
+            if (f == NULL)
+                return;
+                
             if (SCREEN_H < 768){
                 alfont_textout_ex(bmp, f, s, x, y, color, bg);
             } else {
@@ -173,6 +172,8 @@ class Constant{
         }
 
         static void drawTextCentre(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int y, int color, int bg){
+            if (f == NULL)
+                return;
             if (SCREEN_H < 768){
                 alfont_textout_centre_ex(bmp, f, s, x, y, color, bg);
             } else {
@@ -185,7 +186,3 @@ class Constant{
         static int EXEC_METHOD;
         
 };
-
-string Constant::appDir;
-int Constant::EXEC_METHOD = launch_batch;
-volatile uint32_t Constant::totalTicks = 0;

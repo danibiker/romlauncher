@@ -62,6 +62,4 @@ class Traza{
     private:
         static FILE *fp; // file pointer
 };
-FILE * Traza::fp = NULL; // separate definition
-char Traza::log_message[256];
-int Traza::level;
+

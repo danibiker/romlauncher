@@ -27,6 +27,8 @@ class Joystick{
         int getButtonStat(int btn);
         bool isJoyPressed();
         bool isJoyReleased();
+        static uint32_t last;
+        void resetButtons();
 
     private:
         const uint32_t MAXJOYPAUSE = 700;
@@ -77,15 +79,26 @@ Joystick::~Joystick(){
     remove_joystick();
 }
 
+void Joystick::resetButtons(){
+    memset(jbuttonsStat, 0, sizeof(jbuttonsStat));
+    joypress = 0;
+    joyrelease = 0;
+}
+
 int Joystick::init(){
+    if (arrButtons != NULL){
+        delete [] arrButtons;
+        delete [] hats;
+    }
+
     int joyType = JOY_TYPE_AUTODETECT;
     #ifdef DOS
         joyType = JOY_TYPE_8BUTTON;
     #endif
-
+      
     /* the first thing is to initialise the joystick driver */
     if (install_joystick(joyType) != 0) {
-        sprintf(Traza::log_message, "Info initialising joystick\n%s", allegro_error);
+        sprintf(Traza::log_message, "Info initialising joystick\n %s", allegro_error);
         Traza::print();
         return 1;
     }
@@ -121,8 +134,7 @@ int Joystick::init(){
     //Needed to poll the joystick once to avoid repeating the last press
     //when the app was closed on the next app open. Very weird allegro thing
     readJoystick();
-    joypress = 0;   //Reset the key flay
-    joyrelease = 0; //Reset the key flay
+    resetButtons();
     return 0;
 }
 
@@ -219,8 +231,6 @@ bool Joystick::isJoyReleased(){
  * 
  */
 bool Joystick::isJoyPressed(){
-    static uint32_t last = Constant::getTicks();
-
     if ((Constant::getTicks() - last > MAXJOYPAUSE || last > MAXJOYPAUSE) && longJoyPause < MAXJOYPAUSE && joypress){
         bool first = longJoyPause == 0;
         longJoyPause += maxFrameTime;
@@ -230,8 +240,6 @@ bool Joystick::isJoyPressed(){
         return joypress == 1;
     } else 
         return 0;
-
-    //return joypress == 1;
 }
 
 /**
@@ -309,6 +317,7 @@ int Joystick::getAxisPos(int nStick, int nAxis){
         else 
             return -1;
 }
+
 
 /**
  * 
