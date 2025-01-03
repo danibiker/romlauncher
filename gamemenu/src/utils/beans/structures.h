@@ -85,6 +85,8 @@ class ConfigMain{
     ConfigMain(){
         resolution[0] = 0;
         resolution[1] = 0;
+        debug = false;
+        path_prefix = "";
     }
     ~ConfigMain(){
     }

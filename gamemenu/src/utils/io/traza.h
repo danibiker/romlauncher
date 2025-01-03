@@ -22,6 +22,14 @@ class Traza{
             close();
         }
         
+        static void print(int l, string message){
+            if (fp != NULL && l >= level){
+                //sprintf(log_message, "error trying set resolution %dx%d: \"%s\"", w, h, allegro_error);
+                fprintf(fp, "%s\n", message.c_str());
+                if (level == T_DEBUG) fflush(fp);
+            }
+        }
+
         static void print(int l){
             if (fp != NULL && l >= level){
                 //sprintf(log_message, "error trying set resolution %dx%d: \"%s\"", w, h, allegro_error);

@@ -9,11 +9,10 @@
 				"-O2", "-s", "-Wall",
 				"-DDOS",
 				"-I${workspaceFolder}/src",
-				"-I/home/daniel/Apps/Develop/dos/allegro-4.9.2/include",
-				"-I/home/daniel/Apps/Develop/dos/djgpp/i586-pc-msdosdjgpp/sys-include",
-				"-I/home/daniel/Apps/Develop/dos/djgpp/include",
-				"-L/home/daniel/Apps/Develop/dos/djgpp/lib",
-				"-L/home/daniel/Apps/Develop/dos/allegro-4.9.2/lib",
+				"-I${DOSDEV}/allegro-4.9.2/include",
+				"-I${DOSDEV}/djgpp/include",
+				"-L${DOSDEV}/djgpp/lib",
+				"-L${DOSDEV}/allegro-4.9.2/lib",
 				"${workspaceFolder}/src/utils/font/alfont.cpp",
 				"${workspaceFolder}/main.cpp",
 				"-o",
@@ -28,7 +27,8 @@
 			"options": {
 				"cwd": "${fileDirname}",
 				"env": {
-                    "DJBIN": "/home/daniel/Apps/Develop/dos/djgpp/bin"
+					"DOSDEV": "${workspaceFolder}/dep/dosdev",
+                    "DJBIN": "${workspaceFolder}/dep/dosdev/djgpp/bin"
                 }
 			},
 			"problemMatcher": [
@@ -54,7 +54,7 @@
 			"options": {
 				"cwd": "${fileDirname}",
 				"env": {
-                    "DJBIN": "/home/daniel/Apps/Develop/dos/djgpp/bin"
+                    "DJBIN": "${workspaceFolder}/dep/dosdev/djgpp/bin"
                 }
 			},
 			"problemMatcher": [
@@ -90,20 +90,17 @@
 				"-g", "-Wall",
 				"-DUNIX",
 				"-I${workspaceFolder}/src",
-				"-I/home/daniel/Apps/Develop/dos/allegro/alpng13/src",
+				"-I${workspaceFolder}/dep/dosdev/unix/alpng13/src",
 				"-I/usr/include/freetype2",
 				"-L/usr/lib",
-				"-L/home/daniel/Apps/Develop/dos/allegro/alpng13/lib/unix",
+				"-L${workspaceFolder}/dep/dosdev/unix/alpng13",
 				"${workspaceFolder}/main.cpp",
 				"${workspaceFolder}/src/utils/font/alfont.cpp",
 				"-o",
 				"${workspaceFolder}/gmenu/gamemenu",
 				"-lalpng",
 				"-lalleg",
-				"-lfreetype",
-				//"-lpng",
-				//"-lz"
-				
+				"-lfreetype"
 			],
 			"options": {
 				"cwd": "/usr/bin"

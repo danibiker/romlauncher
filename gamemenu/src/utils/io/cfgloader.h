@@ -8,6 +8,8 @@
 #include <iostream>
 #include <vector>
 
+static const string CONFIGFILE = "gmenu.cfg";
+
 class CfgLoader{
     public:
         CfgLoader(){
@@ -32,6 +34,10 @@ class CfgLoader{
             configMain.resolution[1] = h;
         }
 
+        bool isDebug(){
+            return configMain.debug;
+        }
+
         ConfigMain configMain;
         vector<ConfigEmu> configEmus;
 
@@ -42,8 +48,7 @@ class CfgLoader{
         void loadMainConfig(){
             dirutil dir;
 
-            string filepath = Constant::getAppDir() //+ string(tempFileSep) + "gmenu" 
-                + string(tempFileSep) + "gmenu.cfg";
+            string filepath = Constant::getAppDir() + string(tempFileSep) + CONFIGFILE;
 
             //if (dir.fileExists(filepath.c_str()) && !dir.isDir(filepath.c_str())){
                 fstream emucfg;
@@ -94,7 +99,7 @@ class CfgLoader{
         void loadEmuConfig(string emuname){
             ConfigEmu cfgEmu;
             dirutil dir;
-            string strFilepath = Constant::getAppDir() + string(tempFileSep) //+ "gmenu" + string(tempFileSep) 
+            string strFilepath = Constant::getAppDir() + string(tempFileSep)
                 + "config" + string(tempFileSep) + emuname + ".cfg";
             const char *filepath = strFilepath.c_str();
 

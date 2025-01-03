@@ -9,18 +9,18 @@
             "type": "cppdbg",
             "request": "launch",
             //Launch for LINUX
-            //"program": "${workspaceFolder}/gmenu/gamemenu",
+            "program": "${workspaceFolder}/gmenu/gamemenu",
             //Launch for Windows
-            "program": "${workspaceFolder}/gmenu/gamemenu.exe",
+            //"program": "${workspaceFolder}/gmenu/gamemenu.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "MIMode": "gdb",
             //Debugger for LINUX
-            //"miDebuggerPath": "/usr/bin/gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
             //Debugger for Windows
-            "miDebuggerPath": "C:/develop/msys2/mingw64/bin/gdb.exe",
+            //"miDebuggerPath": "C:/develop/msys2/mingw64/bin/gdb.exe",
             "setupCommands": [
                 {
                     "description": "Habilitar la impresión con sangría para gdb",
@@ -29,9 +29,9 @@
                 }
             ],
             //Launch for LINUX
-            //"preLaunchTask": "UNIX DJGPP C/C++: compile gamemenu"
+            "preLaunchTask": "UNIX DJGPP C/C++: compile gamemenu"
             //Launch for Windows
-            "preLaunchTask": "WINDOWS DJGPP C/C++: compile gamemenu"
+            //"preLaunchTask": "WINDOWS DJGPP C/C++: compile gamemenu"
         }
     ]
 }

@@ -228,25 +228,27 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
  * 
  */
 int main(int argc, char *argv[]){
-    int depth = 16;
-    string rutaApp = SOUtils::iniciarSistema(argv);
-    Traza::open();
-    //Traza::level = Traza::T_DEBUG;
-
+    int colorDepth = 16;
     argv0 = argv[0];
-    bool debug = true;
+    string rutaApp = SOUtils::iniciarSistema(argv);
+    CfgLoader cfgLoader;
 
-    if (debug) cout << "Initializing allegro..." << endl;
+    Traza::open();
+    if (cfgLoader.isDebug()){
+        Traza::level = Traza::T_DEBUG;
+    }
 
+    Traza::print(Traza::T_DEBUG, "Initializing allegro...");
     // Initializes the Allegro library.
     if (allegro_init() != 0) {
+        Traza::print(Traza::T_ERROR, "Unable to initialize allegro");
         return 1;
     }
 
     LOCK_FUNCTION(closeRequestedHandler);
     set_close_button_callback(closeRequestedHandler);
 
-    if (debug) cout << "Initializing timers..." << endl;
+    Traza::print(Traza::T_DEBUG, "Initializing timers...");
     // Installs the Allegro timer interrupt handler.
     install_timer();
 
@@ -255,13 +257,13 @@ int main(int argc, char *argv[]){
     LOCK_FUNCTION(incGameTimeCounter);
     install_int_ex(incGameTimeCounter, MSEC_TO_TIMER(maxFrameTime));
 
-    if (debug) cout << "Initializing keyboard..." << endl;
+    Traza::print(Traza::T_DEBUG, "Initializing keyboard...");
     // Installs the Allegro keyboard interrupt handler.
     install_keyboard();
     LOCK_VARIABLE(key_up);
     keyboard_lowlevel_callback = keypress_watcher;
 
-    if (debug) cout << "Initializing allegro png..." << endl;
+    Traza::print(Traza::T_DEBUG, "Initializing allegro png...");
     // Init allegro png library
     alpng_init();
  
@@ -271,8 +273,8 @@ int main(int argc, char *argv[]){
     int card = GFX_AUTODETECT_WINDOWED;
     #if defined(WIN) || defined(UNIX)
         Constant::setExecMethod(launch_spawn);
-        if ((depth = desktop_color_depth()) != 0){
-            depth = desktop_color_depth();
+        if (desktop_color_depth() != 0){
+            colorDepth = desktop_color_depth();
         }
     #endif
 
@@ -281,15 +283,14 @@ int main(int argc, char *argv[]){
         Constant::setExecMethod(launch_batch);
     #endif
 
-    CfgLoader cfgLoader;
+    
     int w = cfgLoader.getWidth(); 
     int h = cfgLoader.getHeight();
     if ( (w == 0 || h == 0)){
         if (get_desktop_resolution(&w, &h) == 0){
             card = GFX_AUTODETECT_FULLSCREEN;
         } else {
-            sprintf(Traza::log_message, "Error getting desktop resolution falling back to 320x240");
-            Traza::print();
+            Traza::print(Traza::T_ERROR, "Error getting desktop resolution falling back to 320x240");
             w = 320;
             h = 240;
         }
@@ -297,13 +298,13 @@ int main(int argc, char *argv[]){
         cfgLoader.setHeight(h);
     }
 
-    set_color_depth(depth);
+    set_color_depth(colorDepth);
 
-    if (debug) cout << "Setting GFX mode..." << endl;
+    Traza::print(Traza::T_DEBUG, "Setting GFX mode...");
     if (set_gfx_mode(card, w, h, 0, 0) != 0) {
         if (set_gfx_mode(GFX_SAFE, 320, 200, 0, 0) != 0) {
             sprintf(Traza::log_message, "error trying set resolution %dx%d: \"%s\"", w, h, allegro_error);
-            Traza::print();
+            Traza::print(Traza::T_ERROR);
             // Switch to text mode, 320x200.
             set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
             allegro_message("Cannot set graphics mode:\r\n%s\r\n", allegro_error);
@@ -312,18 +313,18 @@ int main(int argc, char *argv[]){
         }
     }
 
-    if (debug) cout << "Loading emulators config..." << endl;
+    Traza::print(Traza::T_DEBUG, "Loading emulators config...");
     GameMenu gameMenu(&cfgLoader);
 
-    if (debug) cout << "Creating menu data..." << endl;
+    Traza::print(Traza::T_DEBUG, "Creating menu data...");
     ListMenu listMenu(SCREEN_W, SCREEN_H);
 
-    if (debug) cout << "Loading fonts..." << endl;
+    Traza::print(Traza::T_DEBUG, "Loading fonts...");
     Fonts::init();
     Fonts::initFonts(SCREEN_H / SCREENHDIV);
     ALFONT_FONT *fontsmall = Fonts::getFont(Fonts::FONTSMALL);
 
-    if (debug) cout << "Setting layout..." << endl;
+    Traza::print(Traza::T_DEBUG, "Setting layout...");
     listMenu.setLayout(LAYBOXES, SCREEN_W, SCREEN_H);
 
     //if (is_windowed_mode()) {
@@ -332,42 +333,34 @@ int main(int argc, char *argv[]){
     //    /* Fullscreen mode stuff. */
     //}         
 
-    if (debug) cout << "Setting palette..." << endl;
+    Traza::print(Traza::T_DEBUG, "Setting palette...");
     set_palette(default_palette);
-    if (debug) cout << "clearing screen..." << endl;
+    Traza::print(Traza::T_DEBUG, "clearing screen...");
     clear_bitmap(screen);
     
     //set_palette(desktop_palette);
     textColor = makecol(255, 255, 255);
     backgroundColor = makecol(0, 0, 0);
 
-    if (debug) cout << "Showing text..." 
-        << (screen == NULL ? "screen error; " : "") 
-        << (font == NULL ? "font error; " : "")
-        << (textColor == -1 ? "textColor error; " : "textColor: ") << textColor
-        << "w,h -> " << SCREEN_W / 2 << "," << SCREEN_H / 2
-        << endl;
-    if (debug) Constant::drawTextCentre(screen, fontsmall, "Creating bitmap buffer...", SCREEN_W / 2, SCREEN_H / 2, textColor, backgroundColor);
+    if (cfgLoader.isDebug()) 
+        Constant::drawTextCentre(screen, fontsmall, "Creating bitmap buffer...", SCREEN_W / 2, SCREEN_H / 2, textColor, backgroundColor);
 
-    if (debug) cout << "Creating bitmap buffer..." << endl;
+    Traza::print(Traza::T_DEBUG, "Creating bitmap buffer...");
     if (!gameMenu.initDblBuffer()){
-        sprintf(Traza::log_message, "Could not create bitmap");
-        Traza::print();
+        Traza::print(Traza::T_ERROR, "Could not create bitmap");
         return 1;
     }
 
-    if (debug) cout << "Installing sound..." << endl;
+    Traza::print(Traza::T_DEBUG, "Installing sound...");
     if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0){
         sprintf(Traza::log_message, "Error openning sound %s", allegro_error);
-        Traza::print();
+        Traza::print(Traza::T_ERROR);
     }
     
     clear(screen);
-    //textout_centre_ex(screen, font, "Creating transparency table...", SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
     /* Some one time initialisation code. */
     //create_trans_table(&global_trans_table, desktop_palette, 128, 128, 128, NULL);
-    //clear(screen);
-    if (debug) cout << "Loading games..." << endl;
+    Traza::print(Traza::T_DEBUG, "Loading games...");
     Constant::drawTextCentre(screen, fontsmall, "Loading games...", SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
     
     if (cfgLoader.configMain.debug){
@@ -379,7 +372,7 @@ int main(int argc, char *argv[]){
         readkey();
     }
 
-    if (debug) cout << "Processing keys..." << endl;
+    Traza::print(Traza::T_DEBUG, "Processing keys...");
     processKeys(listMenu, gameMenu);
     remove_keyboard();
     remove_timer();
