@@ -6,6 +6,7 @@
 //#endif
 #include <allegro.h>
 #include <utils/const/Constant.h>
+#include "utils/font/fonts.h"
 
 #include <iostream>
 #include <vector>
@@ -333,6 +334,7 @@ int Joystick::configureButtons(){
     unsigned int btnConfig = 0;
     int axisPos = -1;
     cout << "joy 0 with " << joy[joyPos0].num_buttons << " buttons" << endl;
+    ALFONT_FONT *fontsmall = Fonts::getFont(Fonts::FONTSMALL);
     
     while (joy[joyPos0].flags & JOYFLAG_CALIBRATE) {
         //const char *msg = calibrate_joystick_name(0);
@@ -367,10 +369,10 @@ int Joystick::configureButtons(){
         clear_bitmap(screen);
         
         string msg = "Press joystick button " + string(jbuttonsTxt[cfgBtn]);
-        textout_centre_ex(screen, font, joystick_driver->name, SCREEN_W/2, SCREEN_H / 2 - (font->height + 5)*2, palette_color[255], 0);
-        textout_centre_ex(screen, font, msg.c_str(), SCREEN_W/2, SCREEN_H / 2, palette_color[255], 0);
-        textout_centre_ex(screen, font, "(Press \"BACKSPACE\" to exit", SCREEN_W/2, SCREEN_H / 2 + (font->height + 5) * 2, palette_color[255], 0);
-        textout_centre_ex(screen, font, "or press \"DEL\" to avoid button)", SCREEN_W/2, SCREEN_H / 2 + (font->height + 5) * 3, palette_color[255], 0);
+        Constant::drawTextCentre(screen, fontsmall, joystick_driver->name, SCREEN_W/2, SCREEN_H / 2 - (fontsmall->face_h + 5)*2, palette_color[255], 0);
+        Constant::drawTextCentre(screen, fontsmall, msg.c_str(), SCREEN_W/2, SCREEN_H / 2, palette_color[255], 0);
+        Constant::drawTextCentre(screen, fontsmall, "(Press \"BACKSPACE\" to exit", SCREEN_W/2, SCREEN_H / 2 + (fontsmall->face_h + 5) * 2, palette_color[255], 0);
+        Constant::drawTextCentre(screen, fontsmall, "or press \"DEL\" to avoid button)", SCREEN_W/2, SCREEN_H / 2 + (fontsmall->face_h + 5) * 3, palette_color[255], 0);
 
         while (!joypress){
             if (shouldExit()) return 0;

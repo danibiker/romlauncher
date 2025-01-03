@@ -113,38 +113,35 @@
 			],
 			"group": "build",
 			"detail": "compiler: bin/i586-pc-msdosdjgpp-g++"
-		}
-		/*,{
+		},
+		{
 			"type": "cppbuild",
-			"label": "BuildExjoy",
-			"command": "$DJBIN/i586-pc-msdosdjgpp-gcc",
+			"label": "WINDOWS DJGPP C/C++: compile gamemenu",
+			"command": "C:/develop/msys2/mingw64/bin/g++",
 			"args": [
-				"-O2", "-s",
-				"-falign-functions=1",
-				"-falign-jumps=1",
-				"-falign-labels=1",
-				"-falign-loops=1",
-				"-I/home/daniel/Apps/Develop/dos/allegro-4.9.2/include",
-				"-I/home/daniel/Apps/Develop/dos/djgpp/i586-pc-msdosdjgpp/sys-include",
-				"-I/home/daniel/Apps/Develop/dos/djgpp/include",
-				"-L/home/daniel/Apps/Develop/dos/djgpp/lib",
-				"-L/home/daniel/Apps/Develop/dos/allegro-4.9.2/lib",
-				"${workspaceFolder}/exjoy.c",
+				"-g", "-Wall",
+				"-DWIN",
+				"-I${workspaceFolder}/src",
+				"-IC:/develop/msys2/mingw64/include/freetype2",
+				"-I${workspaceFolder}/dep/dosdev/unix/alpng13/src",
+				"-L${workspaceFolder}/dep/dosdev/unix/alpng13",
+				"${workspaceFolder}/main.cpp",
+				"${workspaceFolder}/src/utils/font/alfont.cpp",
 				"-o",
-				"${workspaceFolder}/gmenu/exjoy.exe",
-				"-lalleg"
+				"${workspaceFolder}/gmenu/gamemenu.exe",
+				"-mwindows",
+				"-lalpng",
+				"-lalleg",
+				"-lfreetype"
 			],
 			"options": {
-				"cwd": "${fileDirname}",
-				"env": {
-                    "DJBIN": "/home/daniel/Apps/Develop/dos/djgpp/bin"
-                }
+				"cwd": "C:/develop/msys2/mingw64/bin"
 			},
 			"problemMatcher": [
 				"$gcc"
 			],
 			"group": "build",
-			"detail": "compiler: bin/i586-pc-msdosdjgpp-gcc"
-		}*/
+			"detail": "compiler: g++"
+		}
 	]
 }

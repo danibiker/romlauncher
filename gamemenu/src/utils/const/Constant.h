@@ -155,32 +155,6 @@ class Constant{
                 return i;
         }
 
-        /**
-         * 
-         */
-        static string cutToLength(string text, int maxW){
-            return text.substr(0, idxToCut(text, maxW));
-        }
-
-        static size_t idxToCut(string text, int maxW){
-            if (text.empty())
-                return 0;
-
-            if (text_length(font, text.c_str()) < maxW){
-                return text.length();
-            }
-
-            size_t i = 1;
-            while(i < text.length()){
-                if (text_length(font, text.substr(0, i).c_str()) >= maxW){
-                    i--;
-                    break;
-                }
-                i++;
-            }
-            return i;
-        }
-
         static void setExecMethod(int var){EXEC_METHOD = var;}
         static int getExecMethod(){return EXEC_METHOD;}
         static volatile uint32_t totalTicks;

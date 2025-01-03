@@ -57,7 +57,8 @@ void keypress_watcher(int scancode){
 } END_OF_FUNCTION(keypress_watcher)
 
 void drawFps(BITMAP *video_page){
-    textout_ex(video_page, font, std::to_string(fps).c_str(), 0, font->height, textColor, -1);
+    ALFONT_FONT *fontsmall = Fonts::getFont(Fonts::FONTSMALL);
+    Constant::drawText(video_page, fontsmall, std::to_string(fps).c_str(), 0, fontsmall->face_h , textColor, -1);
 }
 
 void updateScreen(TileMap &tileMap, ListMenu &menuData, GameMenu &gameMenu, bool keypress){
@@ -199,7 +200,7 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
             if (gameTimeCounter > 0) 
                 gameTimeCounter--;
         
-            if (gameMenu.getConfigMain().debug) drawFps(gameMenu.video_page);
+            if (gameMenu.isDebug()) drawFps(gameMenu.video_page);
             /* Blit the video buffer on the screen. */
             blit(gameMenu.video_page, screen, 0, 0, 0, 0, gameMenu.video_page->w, gameMenu.video_page->h);
 
@@ -230,10 +231,13 @@ int main(int argc, char *argv[]){
     int depth = 16;
     string rutaApp = SOUtils::iniciarSistema(argv);
     Traza::open();
+    //Traza::level = Traza::T_DEBUG;
+
     argv0 = argv[0];
-    bool debug = false;
+    bool debug = true;
 
     if (debug) cout << "Initializing allegro..." << endl;
+
     // Initializes the Allegro library.
     if (allegro_init() != 0) {
         return 1;
@@ -264,13 +268,12 @@ int main(int argc, char *argv[]){
     //Very slow
     //set_color_conversion(COLORCONV_KEEP_ALPHA);
 
-    if (debug) cout << "Loading emulators config..." << endl;
-    GameMenu gameMenu;
-
     int card = GFX_AUTODETECT_WINDOWED;
-    
-    #ifdef UNIX
+    #if defined(WIN) || defined(UNIX)
         Constant::setExecMethod(launch_spawn);
+        if ((depth = desktop_color_depth()) != 0){
+            depth = desktop_color_depth();
+        }
     #endif
 
     #ifdef DOS 
@@ -278,8 +281,9 @@ int main(int argc, char *argv[]){
         Constant::setExecMethod(launch_batch);
     #endif
 
-    int w = gameMenu.getWidth(); 
-    int h = gameMenu.getHeight();
+    CfgLoader cfgLoader;
+    int w = cfgLoader.getWidth(); 
+    int h = cfgLoader.getHeight();
     if ( (w == 0 || h == 0)){
         if (get_desktop_resolution(&w, &h) == 0){
             card = GFX_AUTODETECT_FULLSCREEN;
@@ -289,40 +293,11 @@ int main(int argc, char *argv[]){
             w = 320;
             h = 240;
         }
-        gameMenu.setWidth(w);
-        gameMenu.setHeight(h);
+        cfgLoader.setWidth(w);
+        cfgLoader.setHeight(h);
     }
 
-   //if (os_type == OSTYPE_WIN3){
-   //    sprintf(Traza::log_message, "we are on windows 3.xx:");
-   //    Traza::print();
-   //    card = GFX_TEXT;
-   //    struct GFX_MODE_LIST *modes = NULL;
-   //    do{
-   //        card++;
-   //        modes = get_gfx_mode_list(card);
-   //        if (modes != NULL){
-   //            sprintf(Traza::log_message, "we have %d modes", modes->num_modes);
-   //            Traza::print();
-   //            for (int i=0; i < modes->num_modes; i++){
-   //                sprintf(Traza::log_message, "mode bpp: %d, w: %d, h: %d", modes->mode->bpp, modes->mode->width, modes->mode->height);
-   //                Traza::print();
-   //            }
-   //        } else {
-   //            sprintf(Traza::log_message, "mode %d failed", card);
-   //            Traza::print();
-   //        }
-   //    } while (modes == NULL && card < GFX_AUTODETECT_WINDOWED);
-   //    if (modes != NULL){
-   //        destroy_gfx_mode_list(modes);
-   //    }
-   //}
-
-    //if ((depth = desktop_color_depth()) != 0) {
-    //    set_color_depth(depth);
-    //} else {
-        set_color_depth(depth);
-    //}
+    set_color_depth(depth);
 
     if (debug) cout << "Setting GFX mode..." << endl;
     if (set_gfx_mode(card, w, h, 0, 0) != 0) {
@@ -337,12 +312,18 @@ int main(int argc, char *argv[]){
         }
     }
 
+    if (debug) cout << "Loading emulators config..." << endl;
+    GameMenu gameMenu(&cfgLoader);
+
     if (debug) cout << "Creating menu data..." << endl;
     ListMenu listMenu(SCREEN_W, SCREEN_H);
 
     if (debug) cout << "Loading fonts..." << endl;
     Fonts::init();
     Fonts::initFonts(SCREEN_H / SCREENHDIV);
+    ALFONT_FONT *fontsmall = Fonts::getFont(Fonts::FONTSMALL);
+
+    if (debug) cout << "Setting layout..." << endl;
     listMenu.setLayout(LAYBOXES, SCREEN_W, SCREEN_H);
 
     //if (is_windowed_mode()) {
@@ -351,40 +332,54 @@ int main(int argc, char *argv[]){
     //    /* Fullscreen mode stuff. */
     //}         
 
+    if (debug) cout << "Setting palette..." << endl;
     set_palette(default_palette);
+    if (debug) cout << "clearing screen..." << endl;
     clear_bitmap(screen);
-   
-    if (debug) textout_centre_ex(screen, font, "Creating bitmap buffer...", SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
+    
+    //set_palette(desktop_palette);
+    textColor = makecol(255, 255, 255);
+    backgroundColor = makecol(0, 0, 0);
+
+    if (debug) cout << "Showing text..." 
+        << (screen == NULL ? "screen error; " : "") 
+        << (font == NULL ? "font error; " : "")
+        << (textColor == -1 ? "textColor error; " : "textColor: ") << textColor
+        << "w,h -> " << SCREEN_W / 2 << "," << SCREEN_H / 2
+        << endl;
+    if (debug) Constant::drawTextCentre(screen, fontsmall, "Creating bitmap buffer...", SCREEN_W / 2, SCREEN_H / 2, textColor, backgroundColor);
+
+    if (debug) cout << "Creating bitmap buffer..." << endl;
     if (!gameMenu.initDblBuffer()){
         sprintf(Traza::log_message, "Could not create bitmap");
         Traza::print();
         return 1;
     }
 
+    if (debug) cout << "Installing sound..." << endl;
     if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0){
         sprintf(Traza::log_message, "Error openning sound %s", allegro_error);
         Traza::print();
     }
     
-    //set_palette(desktop_palette);
-    textColor = makecol(255, 255, 255);
-    backgroundColor = makecol(0, 0, 0);
     clear(screen);
     //textout_centre_ex(screen, font, "Creating transparency table...", SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
     /* Some one time initialisation code. */
     //create_trans_table(&global_trans_table, desktop_palette, 128, 128, 128, NULL);
     //clear(screen);
-    textout_centre_ex(screen, font, "Loading games...", SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
-
-    if (gameMenu.getConfigMain().debug){
+    if (debug) cout << "Loading games..." << endl;
+    Constant::drawTextCentre(screen, fontsmall, "Loading games...", SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
+    
+    if (cfgLoader.configMain.debug){
         string appDir = argv[0];
         clear_to_color(screen, backgroundColor);
         string msg = "argv[0]:" + appDir;
-        textout_centre_ex(screen, font, msg.c_str(), SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
-        textout_centre_ex(screen, font, Constant::getAppDir().c_str(), SCREEN_W / 2, SCREEN_H / 2 + font->height + 3, textColor, -1);
+        Constant::drawTextCentre(screen, fontsmall, msg.c_str(), SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
+        Constant::drawTextCentre(screen, fontsmall, Constant::getAppDir().c_str(), SCREEN_W / 2, SCREEN_H / 2 + fontsmall->face_h + 3, textColor, -1);
         readkey();
     }
 
+    if (debug) cout << "Processing keys..." << endl;
     processKeys(listMenu, gameMenu);
     remove_keyboard();
     remove_timer();

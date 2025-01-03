@@ -6,6 +6,7 @@ DJDOSBIN=$(COMPILER_DIR)/djgpp/i586-pc-msdosdjgpp/bin
 CC=$(DJBIN)/i586-pc-msdosdjgpp-gcc
 CCPLUS=$(DJBIN)/i586-pc-msdosdjgpp-g++
 UNIXCCPLUS=/usr/bin/g++
+MINGWCC=/mingw64/bin/g++
 #To generate a stubbed exe for DOS with PMODE
 EXE2COFF=$(DJDOSBIN)/exe2coff
 #To generate the main gamemenu program
@@ -17,6 +18,10 @@ FLAGS=-O2 -s -Wall
 INCLUDES_DIR_UNIX=-I src -I$(COMPILER_DIR)/unix/alpng13/src -I/usr/include/freetype2
 LIBS_DIR_UNIX=-L$(COMPILER_DIR)/unix/alpng13 -L/usr/lib
 LIBS_UNIX=-lalpng -lalleg -lfreetype
+#Includes and lib for MINGW
+INCLUDES_DIR_MINGW=-I src -I$(COMPILER_DIR)/unix/alpng13/src -I$(COMPILER_DIR)/allegro/bin/include -I/mingw64/include/freetype2
+LIBS_DIR_MINGW=-L$(COMPILER_DIR)/unix/alpng13 -L$(COMPILER_DIR)/allegro/bin/lib
+LIBS_MINGW=-mwindows -lalpng -lalleg -lfreetype
 
 all: clean dosmenu gamemenu_dos gamemenu_unix
 
@@ -41,6 +46,12 @@ gamemenu_unix:
 	$(UNIXCCPLUS) $(FLAGS) -DUNIX $(INCLUDES_DIR_UNIX) $(LIBS_DIR_UNIX) \
 	src/utils/font/alfont.cpp main.cpp \
 	-o gmenu/gamemenu $(LIBS_UNIX)
+	
+gamemenu_win:
+	@echo "=== Generating the main gamemenu.exe for MINGW ==="
+	$(MINGWCC) $(FLAGS) -DWIN $(INCLUDES_DIR_MINGW) $(LIBS_DIR_MINGW) \
+	src/utils/font/alfont.cpp main.cpp \
+	-o gmenu/gamemenu.exe $(LIBS_MINGW)
 
 .PHONY: clean
 clean:

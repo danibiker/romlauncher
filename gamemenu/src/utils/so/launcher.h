@@ -284,7 +284,8 @@ bool Launcher::launch(vector<string> &commands, bool debug, string argv0){
     bool launchOk = false;
     string comando;
     clear_to_color(screen, backgroundColor);
-    textout_centre_ex(screen, font, "launching command", SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
+    ALFONT_FONT *fontsmall = Fonts::getFont(Fonts::FONTSMALL);
+    Constant::drawTextCentre(screen, fontsmall, "launching command", SCREEN_W / 2, SCREEN_H / 2, textColor, -1);
 
     for (size_t i=0; i < commands.size(); i++){
         string parm = Constant::Trim(commands.at(i));
@@ -292,13 +293,13 @@ bool Launcher::launch(vector<string> &commands, bool debug, string argv0){
             comando += (i > 0 ? " " : "") + parm;
         } 
         if (debug){
-            textout_centre_ex(screen, font, parm.c_str(), SCREEN_W / 2, SCREEN_H / 2 + (font->height + 3) * (i+1), textColor, -1);
+            Constant::drawTextCentre(screen, fontsmall, parm.c_str(), SCREEN_W / 2, SCREEN_H / 2 + (fontsmall->face_h + 3) * (i+1), textColor, -1);
         }
     }
 
     if (debug){
-        textout_centre_ex(screen, font, comando.c_str(), SCREEN_W / 2, SCREEN_H / 2 + (font->height + 3) * (commands.size()+1), textColor, -1);
-        textout_centre_ex(screen, font, "Press a key to continue", SCREEN_W / 2, SCREEN_H / 2 + (font->height + 3) * (commands.size()+2), textColor, -1);
+        Constant::drawTextCentre(screen, fontsmall, comando.c_str(), SCREEN_W / 2, SCREEN_H / 2 + (fontsmall->face_h + 3) * (commands.size()+1), textColor, -1);
+        Constant::drawTextCentre(screen, fontsmall, "Press a key to continue", SCREEN_W / 2, SCREEN_H / 2 + (fontsmall->face_h + 3) * (commands.size()+2), textColor, -1);
         readkey();
     }
 

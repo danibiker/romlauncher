@@ -1,32 +1,11 @@
 # romlauncher
  A multisystem rom launcher primarily made to work in MSDOS
 
-LINUX DEPENDENCIES FOR NATIVE COMPILING
----------------------------------------
-
-* First, download allegro png from https://alpng.sourceforge.net and compile it:
-```
-cd alpng13
-chmod 755 configure
-./configure
-make
-```
-
-* Install the dependencies:
-```
-pacman -S allegro4 freetype2
-```
-
-Go to the root of the project and type:
-```
-make gamemenu_unix
-```
-
 MSDOS DEPENDENCIES FOR CROSS COMPILING IN LINUX ENVIRONMENT
 -----------------------------------------------------------
 
-AUTOMATIC DOWNLOAD OF LIBRARIES
--------------------------------
+  AUTOMATIC DOWNLOAD OF LIBRARIES
+---------------------------------
 
 Go to the dep directory and execute the file install.sh. All the required files specified in the
 next section "MANUAL DOWNLOAD OF LIBRARIES" will be downloaded.
@@ -41,8 +20,8 @@ Go to the root of the project and type:
 make dosmenu gamemenu_dos
 ```
 
-MANUAL DOWNLOAD OF LIBRARIES
-----------------------------
+  MANUAL DOWNLOAD OF LIBRARIES
+------------------------------
 
 If you don't want to execute the script install.sh mentioned on the section above, execute the following steps, prior to executing 'make'
 
@@ -101,5 +80,96 @@ Finally, go to the root of the project and type:
 make dosmenu gamemenu_dos
 ```
 
+LINUX DEPENDENCIES FOR NATIVE COMPILING
+---------------------------------------
+
+* First, download allegro png from https://alpng.sourceforge.net and compile it:
+```
+cd alpng13
+chmod 755 configure
+./configure
+make
+```
+
+* Install the dependencies:
+```
+pacman -S allegro4 freetype
+```
+
+Go to the root of the project and type:
+```
+make gamemenu_unix
+```
+
+WINDOWS DEPENDENCIES FOR MINGW COMPILING
+---------------------------------------
+
+* First, install msys2 from https://www.msys2.org/
+
+Go to the msys2 instalation dir, start mingw64.exe and type the following to update needed dependencies
+
+```
+pacman -Syu
+pacman -S mingw-w64-x86_64-gcc-base make curl wget unzip mingw-w64-x86_64-freetype mingw-w64-x86_64-ccmake mingw-w64-x86_64-cmake-gui mingw-w64-x86_64-gdb mingw-w64-i686-gcc mingw-w64-i686-freetype mingw-w64-i686-cmake mingw-w64-i686-gdb mingw-w64-i686-libvorbis mingw-w64-x86_64-libvorbis
+```
+
+  AUTOMATIC DOWNLOAD OF LIBRARIES
+---------------------------------
+
+* Go to the dep directory and execute the file install_win.sh while being inside mingw environment. All the required files specified in the
+next section "MANUAL DOWNLOAD OF LIBRARIES" will be downloaded.
+
+```
+cd dep
+./install_win.sh
+```
+
+* Go to the root of the project and type:
+```
+make gamemenu_win
+```
+
+  MANUAL DOWNLOAD OF LIBRARIES
+------------------------------
+
+* First, download allegro:
+
+```
+cd dosdev
+wget https://github.com/liballeg/allegro5/releases/download/4.4.3/allegro-4.4.3.zip
+unzip allegro-4.4.3.zip
+cd allegro
+mkdir build
+mkdir bin
+cd build
+cmake-gui ..
+```
+
+On the cmake-gui frontend:
+	1. Press configure and select 'MSYS Makefiles' on the combo
+	2. Set MAKE_BUILD_TYPE to Release
+	3. Uncheck WANT_TESTS
+	4. Set the CMAKE_INSTALL_PREFIX to dosdev/allegro/bin
+	5. Press configure and Generate
+	6. Exit and let the script continue
+
+```
+make
+make install
+cp dosdev/allegro/bin/lib/liballeg44.dll.a dosdev/allegro/bin/lib/liballeg.dll.a
+cp -fR dosdev/allegro/bin/* /mingw64
+```
+
+* Lastly, download allegro png from https://alpng.sourceforge.net and compile it:
+
+```
+mkdir -p dosdev/unix/alpng13
+wget -O dosdev/unix/alpng13.zip -nc https://downloads.sourceforge.net/project/alpng/alpng/1.3/alpng13.zip
+unzip -q dosdev/unix/alpng13.zip -d dosdev/unix/alpng13
+cd dosdev/unix/alpng13
+chmod 755 configure.bat
+./configure.bat mingw
+make
+```
 
 
