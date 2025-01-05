@@ -14,11 +14,15 @@
 #include <process.h>
 #endif
 
+#if defined(_POSIX_VERSION)
+    #include <sys/wait.h>
+#endif
+
 #include <string>
 #include <fstream>
 #include <iostream>
 #include <string.h>
-#include <sys/wait.h>
+
 
 using namespace std;
 
@@ -124,26 +128,37 @@ bool Launcher::launch(vector<string> &commands, bool debug, string argv0){
             } else {
                 argv[j] = strdup(commands[j].c_str());
             }
-            snprintf(Traza::log_message, sizeof(Traza::log_message),"argv[%ld]=%s", j, argv[j]);
+            snprintf(Traza::log_message, sizeof(Traza::log_message),"argv[%lld]=%s", j, argv[j]);
             Traza::print(Traza::T_DEBUG);
         }     
         // end of arguments sentinel is NULL
         argv [j] = NULL;  
         
-        if ( fork() == 0 ){
-            //by convention, argv[0] is the full program path
+        #ifdef UNIX
+            if ( fork() == 0 ){
+                //by convention, argv[0] is the full program path
+                if (execv(commands[0].c_str(), argv) == -1){
+                    Traza::print(Traza::T_ERROR, "No se ha podido ejecutar el programa");
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                Fonts::exit();
+                allegro_exit();
+                int ret;
+                wait(&ret); 
+            }        
+        #else
+            Fonts::exit();
+            allegro_exit();
             if (execv(commands[0].c_str(), argv) == -1){
                 Traza::print(Traza::T_ERROR, "No se ha podido ejecutar el programa");
                 return false;
             } else {
                 return true;
             }
-        } else {
-            Fonts::exit();
-            allegro_exit();
-            int ret;
-	        wait(&ret); 
-        }        
+        #endif 
         // Deallocate memory
         for (j = 0; j < commands.size(); j++)     
             free(argv[j]);
