@@ -105,14 +105,14 @@ bool Launcher::launch(vector<string> &commands, bool debug, string argv0){
     }
 
     if (Constant::getExecMethod() == launch_system ){
-        sprintf(Traza::log_message, "Launching command -> %s", comando.c_str());
+        snprintf(Traza::log_message, sizeof(Traza::log_message), "Launching command -> %s", comando.c_str());
         Traza::print(Traza::T_ALL);
         Fonts::exit();
         allegro_exit();
         launchOk = system(comando.c_str()) == 0;
         Traza::print(Traza::T_DEBUG, "Comando terminado");
     } else if (Constant::getExecMethod() == launch_spawn || Constant::getExecMethod() == launch_create_process){
-        sprintf(Traza::log_message, "Launching command -> %s", comando.c_str());
+        snprintf(Traza::log_message, sizeof(Traza::log_message),"Launching command -> %s", comando.c_str());
         Traza::print(Traza::T_ALL);
         // extra room for program name and sentinel
         char **argv = new char* [commands.size()+1];  
@@ -124,7 +124,7 @@ bool Launcher::launch(vector<string> &commands, bool debug, string argv0){
             } else {
                 argv[j] = strdup(commands[j].c_str());
             }
-            sprintf(Traza::log_message, "argv[%ld]=%s", j, argv[j]);
+            snprintf(Traza::log_message, sizeof(Traza::log_message),"argv[%ld]=%s", j, argv[j]);
             Traza::print(Traza::T_DEBUG);
         }     
         // end of arguments sentinel is NULL

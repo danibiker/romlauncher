@@ -23,6 +23,7 @@ class Sound{
             } 
         }
         ~Sound(){
+            cout << "deleting Sound" << endl;
         }
 
         bool play(int soundid, bool wait){

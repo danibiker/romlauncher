@@ -1,4 +1,59 @@
-#include "main.h"
+#include <string>
+#include <chrono>
+#include <sys/time.h>
+#ifdef UNIX
+    #include <unistd.h>
+#else 
+    #include <process.h>
+#endif
+
+#include "engine/engine.h"
+
+#include <allegro.h>
+
+#include "alpng.h"
+#include "utils/io/traza.h"
+#include "utils/io/joystick.h"
+#include "utils/so/soutils.h"
+#include "utils/uiobjects/tilemap.h"
+#include "utils/font/fonts.h"
+#include "gamemenu.h"
+
+using namespace std;
+
+string argv0;
+volatile int fps = 0;
+volatile int internalfps = 0;
+bool limitFps = true;
+
+const char Constant::FILE_SEPARATOR_UNIX = '/';
+const string Constant::MAME_SYS_ID = "75";
+const string Constant::WHITESPACE = " \n\r\t";
+
+#if defined(WIN) || defined(DOS)
+    char Constant::FILE_SEPARATOR = 0x5C; //Separador de directorios para win32
+#else
+    char Constant::FILE_SEPARATOR = Constant::FILE_SEPARATOR_UNIX; //Separador de directorios para unix
+#endif
+
+char Constant::tempFileSep[2] = {Constant::FILE_SEPARATOR,'\0'};
+int Constant::Constant::backgroundColor;
+int Constant::Constant::textColor;
+string Constant::appDir = "";
+COLOR_MAP Constant::global_trans_table;
+volatile uint32_t Constant::totalTicks = 0;
+int Constant::EXEC_METHOD = launch_batch;
+//uint32_t Joystick::last = 0;
+ALFONT_FONT * Fonts::vFonts[2] = {NULL, NULL};
+volatile int Engine::closeRequested = 0;
+volatile uint32_t Engine::gameTimeCounter = 0;
+volatile int Engine::key_up = 0;
+FILE * Traza::fp = NULL; // separate definition
+char Traza::log_message[256];
+int Traza::level = Traza::T_ERROR;
+const string CfgLoader::CONFIGFILE = "gmenu.cfg";
+
+void processKeys(ListMenu &, GameMenu &);
 
 void drawFps(BITMAP *video_page){
     ALFONT_FONT *fontsmall = Fonts::getFont(Fonts::FONTSMALL);
@@ -138,12 +193,6 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
         }else{
             rest(1);  
         }
-
-        //if (exit || closeRequested){
-        //    sprintf(Traza::log_message, "closeRequested: %d; exit: %d; joy: %d", 
-        //        closeRequested, exit, (gameMenu.joystick.getButtonStat(gameMenu.joystick.J_SELECT) && gameMenu.joystick.getButtonStat(gameMenu.joystick.J_START)));
-        //    Traza::print();
-        //}
     }
 }
 
@@ -162,9 +211,6 @@ int main(int argc, char *argv[]){
 
     Traza::print(Traza::T_DEBUG, "Loading emulators config...");
     GameMenu gameMenu(&cfgLoader);
-    Constant::Constant::backgroundColor = makecol(0, 0, 0);
-    Constant::Constant::textColor = makecol(255, 255, 255);
-
 
     Traza::print(Traza::T_DEBUG, "Creating menu data...");
     ListMenu listMenu(SCREEN_W, SCREEN_H);

@@ -7,14 +7,15 @@
 #include "utils/const/Constant.h"
 #include "utils/font/alfont.h"
 
-
-
 class Fonts{
     public:
         typedef enum{ FONTBIG = 0, FONTSMALL } enumFonts;
 
         Fonts(){}
-        ~Fonts(){}
+        ~Fonts(){
+            cout << "deleting Traza" << endl;
+            exit();
+        }
 
         /**
          * 
@@ -28,8 +29,10 @@ class Fonts{
          */
         static void exit(){
             for (unsigned int i=0; i < 2; i++){
-                alfont_destroy_font(vFonts[i]);
-                vFonts[i] = NULL;
+                if (vFonts[i] != NULL){
+                    alfont_destroy_font(vFonts[i]);
+                    vFonts[i] = NULL;
+                }
             }
             alfont_exit();
         }

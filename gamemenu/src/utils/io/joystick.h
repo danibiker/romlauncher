@@ -27,7 +27,7 @@ class Joystick{
         int getButtonStat(int btn);
         bool isJoyPressed();
         bool isJoyReleased();
-        static uint32_t last;
+        //static uint32_t last;
         void resetButtons();
 
     private:
@@ -71,7 +71,8 @@ Joystick::Joystick(){
     memset(jbuttonsStat, 0, sizeof(jbuttonsStat));
     memset(jbuttonsPrevStat, 0, sizeof(jbuttonsPrevStat));
 }
-Joystick::~Joystick(){
+Joystick::~Joystick(){ 
+    cout << "deleting Joystick" << endl;
     if (arrButtons != NULL){
         delete [] arrButtons;
         delete [] hats;
@@ -98,19 +99,19 @@ int Joystick::init(){
       
     /* the first thing is to initialise the joystick driver */
     if (install_joystick(joyType) != 0) {
-        sprintf(Traza::log_message, "Info initialising joystick\n %s", allegro_error);
+        snprintf(Traza::log_message, sizeof(Traza::log_message),"Info initialising joystick\n %s", allegro_error);
         Traza::print();
         return 1;
     }
 
     /* make sure that we really do have a joystick */
     if (!num_joysticks) {
-        sprintf(Traza::log_message, "Info: joystick not found");
+        snprintf(Traza::log_message, sizeof(Traza::log_message), "Info: joystick not found");
         Traza::print();
         return 1;
     }
 
-    sprintf(Traza::log_message, "Detected joystick \"%s\" with %d buttons", joystick_driver->name, joy[joyPos0].num_buttons);
+    snprintf(Traza::log_message, sizeof(Traza::log_message), "Detected joystick \"%s\" with %d buttons", joystick_driver->name, joy[joyPos0].num_buttons);
     Traza::print();
 
     arrButtons = new int[joy[joyPos0].num_buttons];
@@ -126,7 +127,7 @@ int Joystick::init(){
     }
 
     if (!readConfig() && configureButtons()){
-        sprintf(Traza::log_message, "Writing config");
+        snprintf(Traza::log_message, sizeof(Traza::log_message), "Writing config");
         Traza::print();
         writeConfig();
     }
@@ -217,9 +218,6 @@ bool Joystick::readConfig(){
 bool Joystick::isJoyReleased(){
     bool ret = joyrelease;
     //Now we reset the values
-    //if (joypress) {
-    //    joypress = 0;
-    //}
     if (joyrelease) {
         longJoyPause = 0;
         joyrelease = 0;
@@ -231,6 +229,8 @@ bool Joystick::isJoyReleased(){
  * 
  */
 bool Joystick::isJoyPressed(){
+    static uint32_t last = Constant::getTicks();
+    cout << "last: " << last << "now: " << Constant::getTicks() << endl;
     if ((Constant::getTicks() - last > MAXJOYPAUSE || last > MAXJOYPAUSE) && longJoyPause < MAXJOYPAUSE && joypress){
         bool first = longJoyPause == 0;
         longJoyPause += maxFrameTime;

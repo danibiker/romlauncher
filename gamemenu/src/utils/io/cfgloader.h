@@ -10,17 +10,16 @@
 #include <iostream>
 #include <vector>
 
-static const string CONFIGFILE = "gmenu.cfg";
-
 class CfgLoader{
     public:
         CfgLoader(){
             loadMainConfig();
         }
         ~CfgLoader(){
-
+            cout << "deleting CfgLoader" << endl;
         }
-         int getWidth(){
+        
+        int getWidth(){
             return configMain.resolution[0] < 0 ? 320 : configMain.resolution[0];
         }
 
@@ -44,6 +43,8 @@ class CfgLoader{
         vector<ConfigEmu> configEmus;
 
     private:
+        
+        static const string CONFIGFILE;
         /**
          * 
          */

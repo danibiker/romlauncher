@@ -1,7 +1,8 @@
 #pragma once
 
 #include "utils/const/Constant.h"
-#include "stdio.h"
+#include <iostream>
+#include <stdio.h>
 
 class Traza{
     public:
@@ -19,12 +20,12 @@ class Traza{
         }
 
         ~Traza(){
+            cout << "deleting Traza" << endl;
             close();
         }
         
         static void print(int l, string message){
             if (fp != NULL && l >= level){
-                //sprintf(log_message, "error trying set resolution %dx%d: \"%s\"", w, h, allegro_error);
                 fprintf(fp, "%s\n", message.c_str());
                 if (level == T_DEBUG) fflush(fp);
             }
@@ -32,7 +33,6 @@ class Traza{
 
         static void print(int l){
             if (fp != NULL && l >= level){
-                //sprintf(log_message, "error trying set resolution %dx%d: \"%s\"", w, h, allegro_error);
                 fprintf(fp, "%s\n", log_message);
                 if (level == T_DEBUG) fflush(fp);
             }

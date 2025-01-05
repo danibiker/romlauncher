@@ -634,7 +634,7 @@ public class App
 		frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		windowScrapper = new JInternalFrame(rb.getString("lbl.media.obtain"));
 		windowScrapper.setResizable(true);
-		windowScrapper.setBounds(424, 46, 362, 431);
+		windowScrapper.setBounds(424, 12, 362, 431);
 		windowScrapper.setClosable(true);
 		windowScrapper.getContentPane().add(pnlScrapper, BorderLayout.CENTER);
 		windowScrapper.setVisible(false);
@@ -1096,21 +1096,28 @@ public class App
 			Map<Integer, List<ConfigEmu>> systems = getSystemsToScan();
 			for (Map.Entry<Integer, List<ConfigEmu>> entry : systems.entrySet()) {
 				List<ConfigEmu> emusForSystem = entry.getValue();
-				for (ConfigEmu entryentry : emusForSystem) {
+				for (ConfigEmu configEmu : emusForSystem) {
 					Map<String, String> hashAssetsDir = new HashMap<>();
-					hashAssetsDir.put(SS, Utils.getAbsolutePath(entryentry.getAssets() + File.separator + DIR_SNAP, txtPrefix.getText()));
-					hashAssetsDir.put(SSTITLE, Utils.getAbsolutePath(entryentry.getAssets() + File.separator + DIR_SNAPTIT, txtPrefix.getText()));
-					hashAssetsDir.put(BOX_2D, Utils.getAbsolutePath(entryentry.getAssets() + File.separator + DIR_BOX2D, txtPrefix.getText()));
-					hashAssetsDir.put(SYNOPSIS, Utils.getAbsolutePath(entryentry.getAssets() + File.separator + DIR_SYNOPSIS, txtPrefix.getText()));
+					hashAssetsDir.put(SS, Utils.getAbsolutePath(configEmu.getAssets() + File.separator + DIR_SNAP, txtPrefix.getText()));
+					hashAssetsDir.put(SSTITLE, Utils.getAbsolutePath(configEmu.getAssets() + File.separator + DIR_SNAPTIT, txtPrefix.getText()));
+					hashAssetsDir.put(BOX_2D, Utils.getAbsolutePath(configEmu.getAssets() + File.separator + DIR_BOX2D, txtPrefix.getText()));
+					hashAssetsDir.put(SYNOPSIS, Utils.getAbsolutePath(configEmu.getAssets() + File.separator + DIR_SYNOPSIS, txtPrefix.getText()));
 					
-					String directorioMap  = Utils.getAbsolutePath(entryentry.getMap_file(), txtPrefix.getText() + File.separator + GMENU + File.separator + CONFIG);
-					List<Rom> roms = readFile(directorioMap);
+					String directorioMap  = Utils.getAbsolutePath(configEmu.getMap_file(), txtPrefix.getText() + File.separator + GMENU + File.separator + CONFIG);
+					List<Rom> roms;
+					
+					if (new File(directorioMap).exists()) {
+						roms = readFile(directorioMap);
+					} else {
+						String dirRoms = Utils.getAbsolutePath(configEmu.getRom_directory(), cfgGeneral.getPath_prefix());
+						roms = readDir(dirRoms);
+					}
+					
 					for (Rom rom : roms) {
 						String name = Utils.getFileNameWithoutExtension(rom.getShortFileName());
 						if (allFilesDownloaded(hashAssetsDir, name) && chkIgnore.isSelected()) {
 							continue;
 						}
-						//total += (hashAssetsDir.size()-1);
 						total++;
 					}
 				}
@@ -1863,6 +1870,10 @@ public class App
 				writer.write("convert_enable = " + checkCfgVal(chkConvert) + newLine);
 				writer.write("convert_prefix_src = " + txtDirReplaced.getText() + newLine);
 				writer.write("convert_prefix_dst = " + txtDirToReplace.getText() + newLine);
+				
+				File fileCfg = new File(txtPrefix.getText() + File.separator + GMENU + File.separator + GMENU_CFG);
+				CfgFile.loadConfig(fileCfg, cfgGeneral);
+				
 				JOptionPane.showMessageDialog(frame, rb.getString("alert.error.changessaved"));
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(frame, rb.getString("alert.error.openfailed"));

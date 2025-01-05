@@ -10,12 +10,11 @@
 
 using namespace std;
 
-
-const int maxFps = 30;
-const int bkgSpeedPixPerS = 15;
-const float maxFrameTime = 1000.0 / maxFps;
-const float bkgFrameTimeTick = 1000.0 / bkgSpeedPixPerS;
-const int SCREENHDIV = 15;
+constexpr int maxFps = 30;
+constexpr int bkgSpeedPixPerS = 15;
+constexpr float maxFrameTime = 1000.0 / maxFps;
+constexpr float bkgFrameTimeTick = 1000.0 / bkgSpeedPixPerS;
+constexpr int SCREENHDIV = 15;
 
 typedef enum{ TIPODIRECTORIO, TIPOFICHERO} enumFileAttr;
 typedef enum{ COMPAREWHOLEWORD, COMPAREBEGINNING} enumFileCompare;
@@ -51,13 +50,12 @@ class Constant{
         static void setAppDir(string var){
             appDir = var;
         }
-
+        
+        static const string MAME_SYS_ID;
+        static const string WHITESPACE;
+        static const char FILE_SEPARATOR_UNIX;
         static char FILE_SEPARATOR;
         static char tempFileSep[2];
-        static const string WHITESPACE;
-        //Dependientes del sistema
-        static const char FILE_SEPARATOR_UNIX;
-        static const string MAME_SYS_ID;
         static int backgroundColor;
         static int textColor;
         static COLOR_MAP global_trans_table;

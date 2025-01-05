@@ -98,7 +98,7 @@ int Engine::initEngine(CfgLoader &cfgLoader){
     Traza::print(Traza::T_DEBUG, "Setting GFX mode...");
     if (set_gfx_mode(card, w, h, 0, 0) != 0) {
         if (set_gfx_mode(GFX_SAFE, 320, 200, 0, 0) != 0) {
-            sprintf(Traza::log_message, "error trying set resolution %dx%d: \"%s\"", w, h, allegro_error);
+            snprintf(Traza::log_message, sizeof(Traza::log_message), "error trying set resolution %dx%d: \"%s\"", w, h, allegro_error);
             Traza::print(Traza::T_ERROR);
             // Switch to text mode, 320x200.
             set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
@@ -126,7 +126,7 @@ int Engine::initEngine(CfgLoader &cfgLoader){
 
     Traza::print(Traza::T_DEBUG, "Installing sound...");
     if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0){
-        sprintf(Traza::log_message, "Error openning sound %s", allegro_error);
+        snprintf(Traza::log_message, sizeof(Traza::log_message), "Error openning sound %s", allegro_error);
         Traza::print(Traza::T_ERROR);
     }
 

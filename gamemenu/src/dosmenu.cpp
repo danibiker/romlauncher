@@ -10,51 +10,7 @@
 
 #define min(a, b) (((a) < (b)) ? (a) : (b)) /* for min*/
 
-
-//#include <process.h>    /* for 'execl' */
-//#include <stdio.h>      /* for 'printf' and 'NULL' */
-//#include <errno.h>      /* for 'errno', 'ENOENT' and 'ENOMEM' */
-
 int main(int argc, char *argv[]){
-
-    //spawnlp(P_WAIT, "C:\\juegos\\emu\\CCS64\\ccs64.exe", "ccs64", "ROMS\\TAPES\\C64-DI~1\\EUROPE\\1942(E~1.D64", "-autorun", NULL);
-    //spawnlp(P_WAIT, "command", "command", "/k", "C:\\juegos\\emu\\CCS64\\ccs64.exe", "ROMS\\TAPES\\C64-DI~1\\EUROPE\\1942(E~1.D64", "-autorun", NULL);
-    //spawnlp(P_WAIT, "C:\\juegos\\emu\\genesis\\GENECYST.EXE", "GENECYST.EXE", NULL);
-
-    /*FILE *fp; // file pointer
-    char log_message[256]; // log message buffer
-
-    // Open the log file in append mode (a+)
-    fp = fopen("log.txt", "a+");
-    if (fp == NULL) {
-        printf("Error opening log file!\n");
-        return 1;
-    }
-
-    fprintf(fp, "%s\n", "Before launching game");
-    fflush(fp);
-
-    //system("./RUN.BAT");
-    //execl("child.exe", "child", "arg1", "arg2", NULL);
-    //execl("./RUN.BAT", "RUN", NULL);
-    //execl("C:\\juegos\\emu\\CCS64\\ccs64.exe", "ccs64", "ROMS\\TAPES\\C64-DI~1\\EUROPE\\1942(E~1.D64", "-autorun", NULL);
-    spawnl(P_WAIT, "C:\\juegos\\emu\\CCS64\\ccs64.exe", "ccs64", "ROMS\\TAPES\\C64-DI~1\\EUROPE\\1942(E~1.D64", "-autorun", NULL);
-
-    if (errno == ENOENT){
-        //printf("child.exe not found in current directory\n");
-        fprintf(fp, "%s\n", "child.exe not found in current directory");
-    } else if (errno == ENOMEM){
-        //printf("not enough memory to execute child.exe\n");
-        fprintf(fp, "%s\n", "not enough memory to execute child.exe");
-    } else {
-        //printf("error #%d trying to exec child.exe\n", errno);
-        sprintf(log_message, "error #%d trying to exec child.exe\n", errno);
-        fprintf(fp, "%s\n", log_message);
-    }
-    fflush(fp);
-    fclose(fp);
-    */
-
     const char* batFile = "/RUN.BAT";
     const char* menuFile = "/gamemenu.exe";
 
@@ -87,18 +43,10 @@ int main(int argc, char *argv[]){
 
     while (showMenu){
         printf("launching the menu...\n");
-
-        //if (spawnl(P_WAIT, EXE_MENU, EXE_MENU, NULL) == -1) {
-        //    perror("Failed to launch gamemenu.exe");
-        //    pause();
-        //    exit(1);
-        //}
-
         if (system(EXE_MENU) != 0){
             perror("Failed to launch gamemenu.exe");
             return 1;
         }
-
 
         if ((showMenu = stat(BAT_FILE, &buf) == 0)){
             printf("launching the game...\n");
