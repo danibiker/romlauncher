@@ -16,8 +16,8 @@ class Engine{
         ~Engine(){};
         // Variable usada para la velocidad
         static volatile uint32_t gameTimeCounter;
-        volatile int isCloseRequested();
-        volatile bool isKeyUp();
+        int isCloseRequested();
+        bool isKeyUp();
         Joystick joystick;
     protected:
         int initEngine(CfgLoader &cfgLoader);
@@ -139,11 +139,11 @@ void Engine::stopEngine(){
     allegro_exit();
 }
 
-volatile int Engine::isCloseRequested(){
+int Engine::isCloseRequested(){
     return closeRequested;
 }
 
-volatile bool Engine::isKeyUp(){
+bool Engine::isKeyUp(){
     bool ret = key_up;
     //Now we reset the values
     if (key_up) {

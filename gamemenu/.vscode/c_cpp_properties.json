@@ -5,8 +5,7 @@
             "includePath": [
                "${workspaceFolder}/**",
                "${workspaceFolder}/src",
-                //"/home/daniel/Apps/Develop/dos/djgpp/i586-pc-msdosdjgpp/sys-include",
-                "${workspaceFolder}/dep/dosdev/unix/alpng13/src"
+               "${workspaceFolder}/dep/dosdev/unix/alpng13/src"
             ],
             "defines": ["UNIX"],
             "compilerPath": "/usr/bin/clang",

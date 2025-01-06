@@ -4,7 +4,7 @@
 #ifdef UNIX
     #include <unistd.h>
 #else 
-    #include <process.h>
+    //#include <process.h>
 #endif
 
 #include "engine/engine.h"
@@ -43,7 +43,6 @@ string Constant::appDir = "";
 COLOR_MAP Constant::global_trans_table;
 volatile uint32_t Constant::totalTicks = 0;
 int Constant::EXEC_METHOD = launch_batch;
-//uint32_t Joystick::last = 0;
 ALFONT_FONT * Fonts::vFonts[2] = {NULL, NULL};
 volatile int Engine::closeRequested = 0;
 volatile uint32_t Engine::gameTimeCounter = 0;
@@ -125,7 +124,7 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
                 } else if (key[KEY_ENTER] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_A)){
                     sound.play(SBTNLOAD, true);
                     gameMenu.joystick.resetButtons();
-                    gameMenu.launchProgram(menuData, argv0);
+                    gameMenu.launchProgram(menuData);
                 } else {
                     if (key[KEY_UP] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_UP)){
                         menuData.prevPos();

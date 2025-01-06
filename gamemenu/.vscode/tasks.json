@@ -87,7 +87,7 @@
 			"label": "UNIX C/C++: compile gamemenu",
 			"command": "/usr/bin/g++",
 			"args": [
-				"-g", "-Wall",
+				"-g", "-Wall", //"-Wextra",
 				"-DUNIX",
 				"-I${workspaceFolder}/src",
 				"-I${workspaceFolder}/dep/dosdev/unix/alpng13/src",

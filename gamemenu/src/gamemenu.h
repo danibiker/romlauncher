@@ -43,7 +43,7 @@ class GameMenu : public Engine{
         void createMenuImages(ListMenu &);
         void loadEmuCfg(ListMenu &);
         void refreshScreen(ListMenu &);
-        void launchProgram(ListMenu &, string);
+        void launchProgram(ListMenu &);
         
         bool initDblBuffer(){
             /* Create bitmap for page flipping */
@@ -355,7 +355,7 @@ string GameMenu::encloseWithCharIfSpaces(string str, string encloseChar){
 /**
  * 
  */
-void GameMenu::launchProgram(ListMenu &menuData, string argv0){
+void GameMenu::launchProgram(ListMenu &menuData){
     Launcher launcher;
     dirutil dir;
     vector<string> commands;
@@ -437,7 +437,7 @@ void GameMenu::launchProgram(ListMenu &menuData, string argv0){
     }
 
     saveGameMenuPos(menuData);
-    launcher.launch(commands, cfgLoader->configMain.debug, argv0);
+    launcher.launch(commands, cfgLoader->configMain.debug);
     if (Constant::getExecMethod() != launch_batch ){
         this->initEngine(*this->cfgLoader);
     }

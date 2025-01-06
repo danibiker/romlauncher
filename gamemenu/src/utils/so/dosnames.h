@@ -81,11 +81,12 @@ class DosNames{
         string stripNonAsciiCharacters(string input) {
             string output = "";
             for (char c : input) {
-                if ((c <= 127 || allowedChars.find(c) != string::npos || (c >= 0x00A1)) && c != ' ') {
+                //if ((c <= 127 || allowedChars.find(c) != string::npos || (c >= 0x00A1)) && c != ' ') {
+                if ((allowedChars.find(c) != string::npos) && c != ' ') {
                     string tmpC = Constant::toString(c);
-                    if (c < 0x00A1){
-                        Constant::upperCase(&tmpC);
-                    }
+                    //if (c < 0x00A1){
+                    //    Constant::upperCase(&tmpC);
+                    //}
                     
                     auto it = hashToReplace.find(tmpC);
 

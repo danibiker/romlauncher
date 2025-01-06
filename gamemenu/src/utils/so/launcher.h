@@ -31,12 +31,12 @@ class Launcher{
         Launcher(){};
         ~Launcher(){};
         bool lanzarProgramaUNIXFork(FileLaunch &emulInfo);
-        bool launch(vector<string> &commands, bool debug, string argv0);
+        bool launch(vector<string> &commands, bool debug);
         string descomprimirZIP(string filename);
     private:
         Executable rutaEspecial(string ejecutable, string param, string filerompath);
         void deleteUnzipedRom(string romfile);
-        int dosbatch(vector<string> &commands, string comando, bool debug, string argv0);
+        int dosbatch(vector<string> &commands, string comando, bool debug);
         string getBatchPath();
 };  
 
@@ -85,7 +85,7 @@ Executable Launcher::rutaEspecial(string ejecutable, string param, string filero
 /**
  * 
  */
-bool Launcher::launch(vector<string> &commands, bool debug, string argv0){
+bool Launcher::launch(vector<string> &commands, bool debug){
     bool launchOk = false;
     string comando;
     clear_to_color(screen, Constant::backgroundColor);
@@ -128,7 +128,7 @@ bool Launcher::launch(vector<string> &commands, bool debug, string argv0){
             } else {
                 argv[j] = strdup(commands[j].c_str());
             }
-            snprintf(Traza::log_message, sizeof(Traza::log_message),"argv[%lld]=%s", j, argv[j]);
+            snprintf(Traza::log_message, sizeof(Traza::log_message),"argv[%s]=%s", std::to_string(j).c_str(), argv[j]);
             Traza::print(Traza::T_DEBUG);
         }     
         // end of arguments sentinel is NULL
@@ -164,7 +164,7 @@ bool Launcher::launch(vector<string> &commands, bool debug, string argv0){
             free(argv[j]);
         delete [] argv;
 
-    } else if (Constant::getExecMethod() == launch_batch && dosbatch(commands, comando, debug, argv0) == 0){
+    } else if (Constant::getExecMethod() == launch_batch && dosbatch(commands, comando, debug) == 0){
         Fonts::exit();
         allegro_exit();
         cout << "Exiting to launch the game: " << comando << endl;
@@ -173,7 +173,7 @@ bool Launcher::launch(vector<string> &commands, bool debug, string argv0){
     return launchOk;
 }
 
-int Launcher::dosbatch(vector<string> &commands, string comando, bool debug, string argv0){
+int Launcher::dosbatch(vector<string> &commands, string comando, bool debug){
     
     dirutil dir;        
     std::fstream file(getBatchPath(), std::ios::out);

@@ -26,9 +26,13 @@ LIBS_MINGW=-mwindows -lalpng -lalleg -lfreetype
 all: clean dosmenu gamemenu_dos gamemenu_unix
 
 dosmenu:
-	@echo "=== Generating the main dosmenu.exe ==="
+	@echo "=================================================="
+	@echo "===      Generating the main dosmenu.exe       ==="
+	@echo "=================================================="
 	$(CC) -O2 -s src/dosmenu.cpp -o gmenu/dosmenu.exe
+	@echo "=========================================================================="
 	@echo "=== Stubbing with PMODE instead of the default CWSDPMI that djgpp uses ==="
+	@echo "=========================================================================="
 	$(EXE2COFF) gmenu/dosmenu.exe
 	rm gmenu/dosmenu.exe
 	dd if=pmode/PMODSTUB.EXE of=gmenu/dosmenu.exe conv=notrunc bs=1
@@ -36,19 +40,25 @@ dosmenu:
 	rm gmenu/dosmenu
 
 gamemenu_dos:
+	@echo "=================================================="
 	@echo "=== Generating the main gamemenu.exe for MSDOS ==="
+	@echo "=================================================="
 	$(CCPLUS) $(FLAGS) -DDOS $(INCLUDES_DIR) $(LIBS_DIR) \
 	src/utils/font/alfont.cpp main.cpp \
 	-o gmenu/gamemenu.exe $(LIBS)
 
 gamemenu_unix:
+	@echo "=================================================="
 	@echo "=== Generating the main gamemenu.exe for LINUX ==="
-	$(UNIXCCPLUS) $(FLAGS) -DUNIX $(INCLUDES_DIR_UNIX) $(LIBS_DIR_UNIX) \
+	@echo "=================================================="
+	$(CXX) $(FLAGS) -DUNIX $(INCLUDES_DIR_UNIX) $(LIBS_DIR_UNIX) \
 	src/utils/font/alfont.cpp main.cpp \
 	-o gmenu/gamemenu $(LIBS_UNIX)
 	
 gamemenu_win:
+	@echo "=================================================="
 	@echo "=== Generating the main gamemenu.exe for MINGW ==="
+	@echo "=================================================="
 	$(MINGWCC) $(FLAGS) -DWIN $(INCLUDES_DIR_MINGW) $(LIBS_DIR_MINGW) \
 	src/utils/font/alfont.cpp main.cpp \
 	-o gmenu/gamemenu.exe $(LIBS_MINGW)

@@ -230,7 +230,7 @@ bool Joystick::isJoyReleased(){
  */
 bool Joystick::isJoyPressed(){
     static uint32_t last = Constant::getTicks();
-    cout << "last: " << last << "now: " << Constant::getTicks() << endl;
+    //cout << "last: " << last << "now: " << Constant::getTicks() << endl;
     if ((Constant::getTicks() - last > MAXJOYPAUSE || last > MAXJOYPAUSE) && longJoyPause < MAXJOYPAUSE && joypress){
         bool first = longJoyPause == 0;
         longJoyPause += maxFrameTime;
