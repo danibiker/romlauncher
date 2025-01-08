@@ -35,7 +35,6 @@ class Joystick{
         const uint32_t SHORTJOYPAUSE = 35;
         const char *idBtnChr = "btn_";
         const char *idHatChr = "hat_";
-        const char *idHatRestChr = "hatRest_";
         const char *numBtnChr = "numBtns";
         const char *idAnalogChr = "analog";
         const unsigned int joyPos0 = 0;

@@ -24,7 +24,7 @@ class FileProps{
         }
 
         ~FileProps(){
-            cout << "deleting FileProps" << endl;
+            //cout << "deleting FileProps" << endl;
         }
         
         FileProps(string dir, string filename, int ico, int filetype){

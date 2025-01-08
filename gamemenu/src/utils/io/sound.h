@@ -47,7 +47,7 @@ class Sound{
         map<int, unique_ptr<SAMPLE>> samples;
         const float maxTimeWait = 2000.0;
         const int volume = 255;
-        const int pan = 0;
+        const int pan = 128;
         //1000 represents the frequency that the sample was recorded at, 2000 is twice this, etc
         const int freq = 1000;
 };

@@ -12,16 +12,16 @@ EXE2COFF=$(DJDOSBIN)/exe2coff
 #To generate the main gamemenu program
 INCLUDES_DIR=-I src -I$(COMPILER_DIR)/allegro-4.9.2/include -I$(COMPILER_DIR)/djgpp/i586-pc-msdosdjgpp/sys-include  -I$(COMPILER_DIR)/djgpp/include
 LIBS_DIR=-L$(COMPILER_DIR)/djgpp/lib -L$(COMPILER_DIR)/allegro-4.9.2/lib
-LIBS=-lalpng -lalleg -liconv -lfreetype -lpng -lz
+LIBS=-lalpng -lalmp3 -lalleg -liconv -lfreetype -lpng -lz
 FLAGS=-O2 -s -Wall
 #Includes and lib for UNIX
-INCLUDES_DIR_UNIX=-I src -I$(COMPILER_DIR)/unix/alpng13/src -I/usr/include/freetype2
-LIBS_DIR_UNIX=-L$(COMPILER_DIR)/unix/alpng13 -L/usr/lib
-LIBS_UNIX=-lalpng -lalleg -lfreetype
+INCLUDES_DIR_UNIX=-I src -I$(COMPILER_DIR)/unix/alpng13/src -I$(COMPILER_DIR)/unix/almp3-2.0.5/include -I/usr/include/freetype2
+LIBS_DIR_UNIX=-L$(COMPILER_DIR)/unix/alpng13 -L$(COMPILER_DIR)/unix/almp3-2.0.5/lib/linux -L/usr/lib
+LIBS_UNIX=-lalpng -lalmp3 -lalleg -lfreetype
 #Includes and lib for MINGW
-INCLUDES_DIR_MINGW=-I src -I$(COMPILER_DIR)/unix/alpng13/src -I$(COMPILER_DIR)/allegro/bin/include -I/mingw64/include/freetype2
-LIBS_DIR_MINGW=-L$(COMPILER_DIR)/unix/alpng13 -L$(COMPILER_DIR)/allegro/bin/lib
-LIBS_MINGW=-mwindows -lalpng -lalleg -lfreetype
+INCLUDES_DIR_MINGW=-I src -I$(COMPILER_DIR)/unix/alpng13/src -I$(COMPILER_DIR)/unix/almp3-2.0.5/include -I$(COMPILER_DIR)/allegro/bin/include -I/mingw64/include/freetype2
+LIBS_DIR_MINGW=-L$(COMPILER_DIR)/unix/alpng13 -L$(COMPILER_DIR)/unix/almp3-2.0.5/lib/linux -L$(COMPILER_DIR)/allegro/bin/lib
+LIBS_MINGW=-mwindows -lalpng -lalmp3 -lalleg -lfreetype
 
 all: clean dosmenu gamemenu_dos gamemenu_unix
 

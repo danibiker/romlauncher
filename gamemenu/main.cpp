@@ -98,6 +98,10 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
 
     bool exit = false;
     Sound sound;
+    //Init the music engine to play mp3
+    if (gameMenu.music.loadBG()){
+        gameMenu.music.playBG(0);
+    } 
 
     while (!exit && !gameMenu.isCloseRequested()) {
         //If resizing detected
@@ -122,10 +126,25 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
                 if (key[KEY_ESC] || (gameMenu.joystick.getButtonStat(gameMenu.joystick.J_SELECT) && gameMenu.joystick.getButtonStat(gameMenu.joystick.J_START))){
                     exit = true;
                 } else if (key[KEY_ENTER] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_A)){
+                    //gameMenu.music.pauseBG(0);
+                    //gameMenu.music.closeAll();
                     sound.play(SBTNLOAD, true);
                     gameMenu.joystick.resetButtons();
                     gameMenu.launchProgram(menuData);
+                    
+                    //if (gameMenu.music.loadBG()){
+                    //    gameMenu.music.playBG(0);
+                    //} 
                 } else {
+                    if (key[KEY_P]){
+                        gameMenu.music.pauseBG(0);
+                    } else if (key[KEY_S]){
+                        gameMenu.music.playBG(0);
+                    } else if (key[KEY_R]){
+                        gameMenu.music.rewindBG(0);
+                    }
+                    
+
                     if (key[KEY_UP] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_UP)){
                         menuData.prevPos();
                         sound.play(SBTNCLICK);

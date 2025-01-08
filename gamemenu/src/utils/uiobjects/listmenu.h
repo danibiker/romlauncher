@@ -103,28 +103,36 @@ class ListMenu : public Object{
             static const int bkg = makecol(247, 221, 114);
             static const int black = makecol(0, 0, 0);
             static const int white = makecol(255, 255, 255);
+            static const int lightgray = makecol(222,224,219);
             static const int transpink = makecol(255, 0, 255);
             static int colorTrans = makecol(247, 221, 114);
 
             ALFONT_FONT *fontMenu = Fonts::getFont(Fonts::FONTBIG);
             static BITMAP* imgText = NULL;
+            const int centerPos = this->getX() + this->getW() / 2;
 
             for (int i=this->iniPos; i < this->endPos; i++){
                 auto game = this->listGames.at(i).get();
                 const int screenPos = i - this->iniPos;
+                const int fontHeightRect = screenPos * fontMenu->face_h;
                 const int lineBackground = -1;
-                const int lineTextColor = i == this->curPos ? black : white;
+                int lineTextColor = i == this->curPos ? black : white;
                 string line = game->gameTitle.empty() ? game->shortFileName : game->gameTitle;
 
                 //Drawing a faded background selection rectangle
                 if (i == this->curPos){
-                    //Weird things happen if this line is not used here
-                    //when using antialiased text
-                    set_trans_blender(255, 255, 255, 190);
-                    int y = this->getY() + screenPos * fontMenu->face_h;
-                    drawing_mode(DRAW_MODE_TRANS, video_page, this->getX(), this->getY());
-                    rectfill(video_page, this->getX(), y, this->getW(), y + fontMenu->face_h, colorTrans);
-                    drawing_mode(DRAW_MODE_SOLID, video_page, this->getX(), this->getY());
+                    int y = this->getY() + fontHeightRect;
+                    //Gaining some extra fps when the screen resolution is low
+                    if (SCREEN_H >= 768){
+                        //Weird things happen if this line is not used here
+                        //when using antialiased text
+                        set_trans_blender(255, 255, 255, 190);
+                        drawing_mode(DRAW_MODE_TRANS, video_page, this->getX(), this->getY());
+                        rectfill(video_page, this->getX(), y, this->getW(), y + fontMenu->face_h, colorTrans);
+                        drawing_mode(DRAW_MODE_SOLID, video_page, this->getX(), this->getY());
+                    } else {
+                        lineTextColor = lightgray;
+                    }
                     rect(video_page, this->getX() - 1, y - 1, this->getW() + 1, y + fontMenu->face_h, bkg);
                 }
                 
@@ -164,17 +172,19 @@ class ListMenu : public Object{
 
                 //Finally drawing the text
                 if (this->centerText){
-                    alfont_textout_centre_ex(video_page, fontMenu, line.c_str(), this->getX() + this->getW() / 2, 
-                        this->getY() + screenPos * fontMenu->face_h, lineTextColor, lineBackground);
+                    alfont_textout_centre_ex(video_page, fontMenu, line.c_str(), centerPos, 
+                        this->getY() + fontHeightRect, lineTextColor, lineBackground);
+                    //textout_centre_ex(video_page, font, line.c_str(), centerPos, 
+                    //    this->getY() + fontHeightRect, lineTextColor, lineBackground);
                 } else {
                     if (layout == LAYBOXES && i == this->curPos && imgText != NULL){
                         //masked_blit for transparent surfaces with pink background
                         masked_blit(imgText, video_page, pixelShift, 0, 
-                            this->getX(), this->getY() + screenPos * fontMenu->face_h, 
+                            this->getX(), this->getY() + fontHeightRect, 
                             this->getW() - this->marginX, fontMenu->face_h);
                     } else {
                         Constant::drawText(video_page, fontMenu, line.c_str(), this->getX(), 
-                            this->getY() + screenPos * fontMenu->face_h, lineTextColor, lineBackground);
+                            this->getY() + fontHeightRect, lineTextColor, lineBackground);
                     }
                 }
             }

@@ -9,6 +9,7 @@
 #include "utils/io/cfgloader.h"
 #include "utils/font/fonts.h"
 #include "utils/io/joystick.h"
+#include "utils/io/music.h"
 
 class Engine{
     public:
@@ -19,16 +20,54 @@ class Engine{
         int isCloseRequested();
         bool isKeyUp();
         Joystick joystick;
+        Music music;
+        static void incGameTimeCounter();
     protected:
         int initEngine(CfgLoader &cfgLoader);
         void stopEngine();
     private:
         static volatile int closeRequested;
         static volatile int key_up;
-        static void incGameTimeCounter();
+        
         static void closeRequestedHandler(void);
         static void keypress_watcher(int scancode);
 };
+
+void Engine::stopEngine(){
+    Fonts::exit();
+    allegro_exit();
+}
+
+int Engine::isCloseRequested(){
+    return closeRequested;
+}
+
+bool Engine::isKeyUp(){
+    bool ret = key_up;
+    //Now we reset the values
+    if (key_up) {
+        key_up = 0;
+    }
+    return ret;
+}
+
+// Función para controlar la velocidad
+void Engine::incGameTimeCounter(){
+    Constant::totalTicks++;
+    gameTimeCounter++;
+}
+END_OF_FUNCTION(incGameTimeCounter)
+
+void Engine::closeRequestedHandler(void){
+    closeRequested = true;
+}
+END_OF_FUNCTION(closeRequestedHandler)
+
+void Engine::keypress_watcher(int scancode){
+    if (scancode & 0x80) {
+        key_up = 1;
+    } 
+} END_OF_FUNCTION(keypress_watcher)
 
 
 int Engine::initEngine(CfgLoader &cfgLoader){
@@ -41,7 +80,7 @@ int Engine::initEngine(CfgLoader &cfgLoader){
         return 1;
     }
 
-    //LOCK_FUNCTION(closeRequestedHandler); //This doensn't work with the djgpp compiler for c++ classes
+    LOCK_FUNCTION(closeRequestedHandler);
     set_close_button_callback(Engine::closeRequestedHandler);
 
     Traza::print(Traza::T_DEBUG, "Initializing timers...");
@@ -50,7 +89,7 @@ int Engine::initEngine(CfgLoader &cfgLoader){
 
     LOCK_VARIABLE(gameTimeCounter);
     LOCK_VARIABLE(Constant::totalTicks);
-    //LOCK_FUNCTION(incGameTimeCounter); //This doensn't work with the djgpp compiler for c++ classes
+    LOCK_FUNCTION(incGameTimeCounter);
     install_int_ex(incGameTimeCounter, MSEC_TO_TIMER(maxFrameTime));
 
     Traza::print(Traza::T_DEBUG, "Initializing keyboard...");
@@ -124,48 +163,13 @@ int Engine::initEngine(CfgLoader &cfgLoader){
     /* Some one time initialisation code. Very slow*/
     //create_trans_table(&global_trans_table, desktop_palette, 128, 128, 128, NULL);
 
+    joystick.init();
+
     Traza::print(Traza::T_DEBUG, "Installing sound...");
     if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0){
         snprintf(Traza::log_message, sizeof(Traza::log_message), "Error openning sound %s", allegro_error);
         Traza::print(Traza::T_ERROR);
-    }
-
-    joystick.init();
+    } 
+    
     return 0;
 }
-
-void Engine::stopEngine(){
-    Fonts::exit();
-    allegro_exit();
-}
-
-int Engine::isCloseRequested(){
-    return closeRequested;
-}
-
-bool Engine::isKeyUp(){
-    bool ret = key_up;
-    //Now we reset the values
-    if (key_up) {
-        key_up = 0;
-    }
-    return ret;
-}
-
-// Función para controlar la velocidad
-void Engine::incGameTimeCounter(){
-    Constant::totalTicks++;
-    gameTimeCounter++;
-}
-END_OF_FUNCTION(incGameTimeCounter)
-
-void Engine::closeRequestedHandler(void){
-    closeRequested = true;
-}
-END_OF_FUNCTION(closeRequestedHandler)
-
-void Engine::keypress_watcher(int scancode){
-    if (scancode & 0x80) {
-        key_up = 1;
-    } 
-} END_OF_FUNCTION(keypress_watcher)

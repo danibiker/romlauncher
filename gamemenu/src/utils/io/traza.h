@@ -7,10 +7,10 @@
 class Traza{
     public:
         enum {
-            T_ALL = 0,
-            T_INFO,
+            T_INFO = 0,
             T_DEBUG,
-            T_ERROR
+            T_ERROR,
+            T_ALL
         } ErrorLevel;
 
         static int level;

@@ -43,7 +43,7 @@ dirutil::dirutil(){
 }
 
 dirutil::~dirutil(){
-    cout << "deleting dirutil" << endl;
+    //cout << "deleting dirutil" << endl;
 }
 
 /**
