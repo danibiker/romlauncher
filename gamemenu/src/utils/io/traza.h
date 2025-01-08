@@ -58,7 +58,7 @@ class Traza{
                 }
             }
         }
-        static char log_message[256]; // log message buffer
+        static char log_message[512]; // log message buffer
     private:
         static FILE *fp; // file pointer
 };

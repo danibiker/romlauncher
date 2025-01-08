@@ -114,10 +114,6 @@ bool Launcher::launch(vector<string> &commands, bool debug){
     if (Constant::getExecMethod() == launch_system ){
         snprintf(Traza::log_message, sizeof(Traza::log_message), "Launching command -> %s", comando.c_str());
         Traza::print(Traza::T_ALL);
-        #ifdef UNIX
-            Fonts::exit();
-            allegro_exit();
-        #endif
         launchOk = system(comando.c_str()) == 0;
         Traza::print(Traza::T_DEBUG, "Comando terminado");
     } else if (Constant::getExecMethod() == launch_spawn || Constant::getExecMethod() == launch_create_process){
@@ -134,7 +130,7 @@ bool Launcher::launch(vector<string> &commands, bool debug){
                 argv[j] = strdup(commands[j].c_str());
             }
             snprintf(Traza::log_message, sizeof(Traza::log_message),"argv[%s]=%s", std::to_string(j).c_str(), argv[j]);
-            Traza::print(Traza::T_DEBUG);
+            Traza::print(Traza::T_ALL);
         }     
         // end of arguments sentinel is NULL
         argv [j] = NULL;  
@@ -149,14 +145,10 @@ bool Launcher::launch(vector<string> &commands, bool debug){
                     return true;
                 }
             } else {
-                Fonts::exit();
-                allegro_exit();
                 int ret;
                 wait(&ret); 
             }        
         #else
-            Fonts::exit();
-            allegro_exit();
             if (execv(commands[0].c_str(), argv) == -1){
                 Traza::print(Traza::T_ERROR, "No se ha podido ejecutar el programa");
                 return false;
@@ -170,8 +162,6 @@ bool Launcher::launch(vector<string> &commands, bool debug){
         delete [] argv;
 
     } else if (Constant::getExecMethod() == launch_batch && dosbatch(commands, comando, debug) == 0){
-        Fonts::exit();
-        allegro_exit();
         cout << "Exiting to launch the game: " << comando << endl;
         exit(0);
     }

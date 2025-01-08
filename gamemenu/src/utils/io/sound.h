@@ -7,6 +7,10 @@
 
 #include "utils/const/Constant.h"
 
+#ifdef UNIX
+#include <alsa/asoundlib.h>
+#endif
+
 using namespace std;
 
 class Sound{
@@ -41,6 +45,54 @@ class Sound{
 
         bool play(int soundid){
             return play(soundid, false);
+        }
+        
+        static int alsaInit(){
+            #ifdef UNIX
+                const char *pcm_name = "hw:1";  // Explicitly use hw:1 for card 1
+                const char *ctl_name = "hw:1";  // Explicitly use hw:1 for control
+
+                // Set up the PCM (audio device) and control to hw:1 (card 1)
+                snd_pcm_t *pcm_handle;
+                snd_ctl_t *ctl_handle;
+                int err;
+
+                // Open the PCM device for playback with the given settings
+                err = snd_pcm_open(&pcm_handle, pcm_name, SND_PCM_STREAM_PLAYBACK, 0);
+                if (err < 0) {
+                    std::cerr << "Failed to open PCM device: " << snd_strerror(err) << std::endl;
+                    return 1;
+                }
+
+                // Set the PCM device to use the hardware device 1
+                snd_pcm_hw_params_t *params;
+                snd_pcm_hw_params_alloca(&params);
+                err = snd_pcm_hw_params_any(pcm_handle, params);
+                if (err < 0) {
+                    std::cerr << "Failed to initialize hardware parameters: " << snd_strerror(err) << std::endl;
+                    return 1;
+                }
+
+                err = snd_pcm_hw_params_set_access(pcm_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
+                if (err < 0) {
+                    std::cerr << "Failed to set access type: " << snd_strerror(err) << std::endl;
+                    return 1;
+                }
+
+                // Configure the control device to hw:1 (card 1)
+                err = snd_ctl_open(&ctl_handle, ctl_name, 0);
+                if (err < 0) {
+                    std::cerr << "Failed to open control device: " << snd_strerror(err) << std::endl;
+                    return 1;
+                }
+
+                std::cout << "ALSA initialized successfully with hw:1" << std::endl;
+
+                // Clean up and close handles
+                snd_pcm_close(pcm_handle);
+                snd_ctl_close(ctl_handle);
+            #endif
+            return 0;
         }
     
     private:

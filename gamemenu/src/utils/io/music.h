@@ -225,7 +225,7 @@ int Music::loadBG(){
         mp3[0] = NULL;
     }
 
-    string pathtomusic = Constant::getAppDir() + "/assets/music/80intro.mp3";
+    string pathtomusic = Constant::getAppDir() + "/assets/music/strange.mp3";
     if (mp3[0] != NULL){
         close_mp3_file(mp3[0]);
     }
@@ -236,28 +236,5 @@ int Music::loadBG(){
         mp3[0] = NULL;
         return 0;
     }
-
-
-    //remain = n;
-    //for (i = 0; i < n; i++) {
-    //    if ((mp3[i] = open_mp3_file(pathtomusic.c_str())))
-    //        play_mp3_file(mp3[i], BUFSZ, 255, 128);
-    //    else {
-    //        remain--;
-    //    }
-    //}
-    //while ((!keypressed()) && (remain > 0)) {
-    //    for (i = 0; i < n; i++) {
-    //        if ((mp3[i]) && (poll_mp3_file(mp3[i]) != ALMP3_OK)) {
-    //            close_mp3_file(mp3[i]);
-    //            mp3[i] = NULL;
-    //            remain--;
-    //        }
-    //    }
-    //}
-    //for (i = 0; i < n; i++)
-    //    close_mp3_file(mp3[i]);
-    //free(mp3);
-
     return 1;
 }

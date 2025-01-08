@@ -87,6 +87,7 @@ class ConfigMain{
         resolution[1] = 0;
         debug = false;
         path_prefix = "";
+        alsaReset = false;
     }
     ~ConfigMain(){
     }
@@ -94,6 +95,7 @@ class ConfigMain{
     bool debug;
     string path_prefix;
     int resolution[2];
+    bool alsaReset;
 };
 
 class ConfigEmu{

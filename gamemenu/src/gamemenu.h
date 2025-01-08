@@ -437,12 +437,23 @@ void GameMenu::launchProgram(ListMenu &menuData){
     }
 
     saveGameMenuPos(menuData);
-    launcher.launch(commands, cfgLoader->configMain.debug);
+
+    //For some reason, with Alsa, when launching retroarch, the sound must be deactivated. Otherwise, it freezes
+    bool resetAudio = false;
     #ifdef UNIX
-    if (Constant::getExecMethod() != launch_batch ){
-        this->initEngine(*this->cfgLoader);
-    }
+        resetAudio = true;
     #endif
+    if (cfgLoader->configMain.alsaReset && resetAudio && Constant::getExecMethod() != launch_batch ){
+        remove_sound();
+    }
+
+    launcher.launch(commands, cfgLoader->configMain.debug);
+    
+    //Try to reactivate sound, although it's pointless in my tests. I couldn't make it to work with Alsa.
+    //Install pipewire instead
+    if (cfgLoader->configMain.alsaReset && resetAudio && Constant::getExecMethod() != launch_batch ){
+        this->initSound();
+    }
 }
 
 /**

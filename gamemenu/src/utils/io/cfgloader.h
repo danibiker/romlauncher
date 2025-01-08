@@ -80,6 +80,8 @@ class CfgLoader{
                                 vector<string> res = Constant::splitChar(value, ' ');
                                 configMain.resolution[0] = Constant::strToTipo<int>(res[0]);
                                 configMain.resolution[1] = Constant::strToTipo<int>(res[1]);
+                            } else if (key.compare("alsa_reset") == 0){
+                                configMain.alsaReset = value.compare("yes") == 0 ? true : false ; 
                             }
                         }
                     }

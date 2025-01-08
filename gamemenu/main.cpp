@@ -50,7 +50,7 @@ volatile int Engine::closeRequested = 0;
 volatile uint32_t Engine::gameTimeCounter = 0;
 volatile int Engine::key_up = 0;
 FILE * Traza::fp = NULL; // separate definition
-char Traza::log_message[256];
+char Traza::log_message[512];
 int Traza::level = Traza::T_ERROR;
 const string CfgLoader::CONFIGFILE = "gmenu.cfg";
 

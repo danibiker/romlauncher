@@ -10,6 +10,7 @@
 #include "utils/font/fonts.h"
 #include "utils/io/joystick.h"
 #include "utils/io/music.h"
+#include "utils/io/sound.h"
 
 class Engine{
     public:
@@ -26,6 +27,7 @@ class Engine{
         static void switchOutWindowCallback();
     protected:
         int initEngine(CfgLoader &cfgLoader);
+        int initSound();
         void stopEngine();
     private:
         static volatile int closeRequested;
@@ -79,6 +81,15 @@ void Engine::keypress_watcher(int scancode){
     } 
 } END_OF_FUNCTION(keypress_watcher)
 
+int Engine::initSound(){
+    Traza::print(Traza::T_DEBUG, "Installing sound...");
+    if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0){
+        snprintf(Traza::log_message, sizeof(Traza::log_message), "Error openning sound %s", allegro_error);
+        Traza::print(Traza::T_ERROR);
+        return 1;
+    } 
+    return 0;
+} 
 
 int Engine::initEngine(CfgLoader &cfgLoader){
     int colorDepth = 16;
@@ -181,14 +192,8 @@ int Engine::initEngine(CfgLoader &cfgLoader){
     //create_trans_table(&global_trans_table, desktop_palette, 128, 128, 128, NULL);
 
     joystick.init();
+    //Sound::alsaInit();
+    initSound();
 
-    Traza::print(Traza::T_DEBUG, "Installing sound...");
-    if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0){
-        snprintf(Traza::log_message, sizeof(Traza::log_message), "Error openning sound %s", allegro_error);
-        Traza::print(Traza::T_ERROR);
-    } 
-
-
-    
     return 0;
 }
