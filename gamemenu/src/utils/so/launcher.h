@@ -23,7 +23,6 @@
 #include <iostream>
 #include <string.h>
 
-
 using namespace std;
 
 class Launcher{
@@ -88,6 +87,10 @@ Executable Launcher::rutaEspecial(string ejecutable, string param, string filero
 bool Launcher::launch(vector<string> &commands, bool debug){
     bool launchOk = false;
     string comando;
+    //#ifdef WIN
+    //    comando = "start ";
+    //#endif
+
     clear_to_color(screen, Constant::backgroundColor);
     ALFONT_FONT *fontsmall = Fonts::getFont(Fonts::FONTSMALL);
     Constant::drawTextCentre(screen, fontsmall, "launching command", SCREEN_W / 2, SCREEN_H / 2, Constant::textColor, -1);
@@ -111,8 +114,10 @@ bool Launcher::launch(vector<string> &commands, bool debug){
     if (Constant::getExecMethod() == launch_system ){
         snprintf(Traza::log_message, sizeof(Traza::log_message), "Launching command -> %s", comando.c_str());
         Traza::print(Traza::T_ALL);
-        Fonts::exit();
-        allegro_exit();
+        #ifdef UNIX
+            Fonts::exit();
+            allegro_exit();
+        #endif
         launchOk = system(comando.c_str()) == 0;
         Traza::print(Traza::T_DEBUG, "Comando terminado");
     } else if (Constant::getExecMethod() == launch_spawn || Constant::getExecMethod() == launch_create_process){

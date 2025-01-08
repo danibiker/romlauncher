@@ -438,9 +438,11 @@ void GameMenu::launchProgram(ListMenu &menuData){
 
     saveGameMenuPos(menuData);
     launcher.launch(commands, cfgLoader->configMain.debug);
+    #ifdef UNIX
     if (Constant::getExecMethod() != launch_batch ){
         this->initEngine(*this->cfgLoader);
     }
+    #endif
 }
 
 /**

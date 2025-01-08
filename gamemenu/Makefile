@@ -20,8 +20,8 @@ LIBS_DIR_UNIX=-L$(COMPILER_DIR)/unix/alpng13 -L$(COMPILER_DIR)/unix/almp3-2.0.5/
 LIBS_UNIX=-lalpng -lalmp3 -lalleg -lfreetype
 #Includes and lib for MINGW
 INCLUDES_DIR_MINGW=-I src -I$(COMPILER_DIR)/unix/alpng13/src -I$(COMPILER_DIR)/unix/almp3-2.0.5/include -I$(COMPILER_DIR)/allegro/bin/include -I/mingw64/include/freetype2
-LIBS_DIR_MINGW=-L$(COMPILER_DIR)/unix/alpng13 -L$(COMPILER_DIR)/unix/almp3-2.0.5/lib/linux -L$(COMPILER_DIR)/allegro/bin/lib
-LIBS_MINGW=-mwindows -lalpng -lalmp3 -lalleg -lfreetype
+LIBS_DIR_MINGW=-L$(COMPILER_DIR)/unix/alpng13 -L$(COMPILER_DIR)/unix/almp3-2.0.5/lib/mingw32 -L$(COMPILER_DIR)/allegro/bin/lib
+LIBS_MINGW=-mwindows -lalmp3 -lalpng -lalleg -lfreetype
 
 all: clean dosmenu gamemenu_dos gamemenu_unix
 

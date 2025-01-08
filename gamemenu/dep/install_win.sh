@@ -8,10 +8,9 @@ echo "************************************************"
 echo "*** Downloading for WINDOWS NATIVE COMPILING ***"
 echo "************************************************"
 
-cd dosdev
 wget https://github.com/liballeg/allegro5/releases/download/4.4.3/allegro-4.4.3.zip
-unzip allegro-4.4.3.zip
-cd allegro
+unzip -q allegro-4.4.3.zip -d dosdev
+cd dosdev/allegro
 mkdir build
 mkdir bin
 cd build
@@ -31,9 +30,21 @@ cp dosdev/allegro/bin/lib/liballeg44.dll.a dosdev/allegro/bin/lib/liballeg.dll.a
 cp -fR dosdev/allegro/bin/* /mingw64
 
 mkdir -p dosdev/unix/alpng13
-wget -O dosdev/unix/alpng13.zip -nc https://downloads.sourceforge.net/project/alpng/alpng/1.3/alpng13.zip
-unzip -q dosdev/unix/alpng13.zip -d dosdev/unix/alpng13
+wget -O alpng13.zip -nc https://downloads.sourceforge.net/project/alpng/alpng/1.3/alpng13.zip
+unzip -q alpng13.zip -d dosdev/unix/alpng13
 cd dosdev/unix/alpng13
 chmod 755 configure.bat
 ./configure.bat mingw
+make
+
+cd $currdir
+wget -O almp3-2.0.5.tar.xz https://sourceforge.net/projects/almp3/files/2.0.5/almp3-2.0.5.tar.xz/download
+tar -xJf almp3-2.0.5.tar.xz -C dosdev/unix
+cd dosdev/unix/almp3-2.0.5
+#comment line 6 of the makefile representing the line: TARGET=DJGPP_STATIC
+sed -i '6s/^/#/' Makefile
+#uncomment line 9 of the makefile representing the line: TARGET=MINGW32_STATIC
+sed -i '7s/^#//' Makefile
+#remove the text -march=pentium of the line 52
+sed -i '31s/-march=pentium//' Makefile
 make

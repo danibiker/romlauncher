@@ -118,7 +118,7 @@
 		},
 		{
 			"type": "cppbuild",
-			"label": "WINDOWS DJGPP C/C++: compile gamemenu",
+			"label": "WINDOWS C/C++: compile gamemenu",
 			"command": "C:/develop/msys2/mingw64/bin/g++",
 			"args": [
 				"-g", "-Wall",
@@ -126,13 +126,17 @@
 				"-I${workspaceFolder}/src",
 				"-IC:/develop/msys2/mingw64/include/freetype2",
 				"-I${workspaceFolder}/dep/dosdev/unix/alpng13/src",
+				"-I${workspaceFolder}/dep/dosdev/unix/almp3-2.0.5/include",
 				"-L${workspaceFolder}/dep/dosdev/unix/alpng13",
+				"-L${workspaceFolder}/dep/dosdev/unix/almp3-2.0.5/lib/mingw32",
 				"${workspaceFolder}/main.cpp",
 				"${workspaceFolder}/src/utils/font/alfont.cpp",
+				//"${workspaceFolder}/src/utils/so/focus.cpp",
 				"-o",
 				"${workspaceFolder}/gmenu/gamemenu.exe",
 				"-mwindows",
 				"-lalpng",
+				"-lalmp3",
 				"-lalleg",
 				"-lfreetype"
 			],

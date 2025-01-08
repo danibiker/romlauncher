@@ -8,16 +8,18 @@
 #endif
 
 #include "engine/engine.h"
-
 #include <allegro.h>
 
 #include "alpng.h"
 #include "utils/io/traza.h"
 #include "utils/io/joystick.h"
 #include "utils/so/soutils.h"
+//#include "utils/so/focus.h"
 #include "utils/uiobjects/tilemap.h"
 #include "utils/font/fonts.h"
+
 #include "gamemenu.h"
+
 
 using namespace std;
 
@@ -103,6 +105,8 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
         gameMenu.music.playBG(0);
     } 
 
+    //Focus::setFocus();
+
     while (!exit && !gameMenu.isCloseRequested()) {
         //If resizing detected
         //if (menuData.maxLines != menuData.getScreenNumLines() - 1){
@@ -111,7 +115,12 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
         //    //clear_to_color(gameMenu.video_page, Constant::backgroundColor);
         //    updateScreen(tileMap, menuData, gameMenu, true, animateBkg);
         //}
-
+        //if (Focus::notFocused()){
+        //    gameMenu.music.pauseBG(0);
+        //    gameMenu.music.closeAll();
+        //    cout << "lost focus" << endl;
+        //}
+        
         gameMenu.gameTimeCounter = !limitFps ? 1 : gameMenu.gameTimeCounter;
 
         static uint32_t lastGameTick = Constant::getTicks();
@@ -126,14 +135,14 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
                 if (key[KEY_ESC] || (gameMenu.joystick.getButtonStat(gameMenu.joystick.J_SELECT) && gameMenu.joystick.getButtonStat(gameMenu.joystick.J_START))){
                     exit = true;
                 } else if (key[KEY_ENTER] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_A)){
-                    //gameMenu.music.pauseBG(0);
+                    gameMenu.music.pauseBG(0);
                     //gameMenu.music.closeAll();
                     sound.play(SBTNLOAD, true);
                     gameMenu.joystick.resetButtons();
                     gameMenu.launchProgram(menuData);
                     
                     //if (gameMenu.music.loadBG()){
-                    //    gameMenu.music.playBG(0);
+                        gameMenu.music.playBG(0);
                     //} 
                 } else {
                     if (key[KEY_P]){
@@ -143,7 +152,6 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
                     } else if (key[KEY_R]){
                         gameMenu.music.rewindBG(0);
                     }
-                    
 
                     if (key[KEY_UP] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_UP)){
                         menuData.prevPos();
@@ -253,7 +261,7 @@ int main(int argc, char *argv[]){
     clear(screen);
     Traza::print(Traza::T_DEBUG, "Loading games...");
     Constant::drawTextCentre(screen, fontsmall, "Loading games...", SCREEN_W / 2, SCREEN_H / 2, Constant::textColor, -1);
-    
+
     if (cfgLoader.configMain.debug){
         string appDir = argv[0];
         clear_to_color(screen, Constant::backgroundColor);

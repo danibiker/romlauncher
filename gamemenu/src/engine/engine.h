@@ -22,6 +22,8 @@ class Engine{
         Joystick joystick;
         Music music;
         static void incGameTimeCounter();
+        static void switchInWindowCallback();
+        static void switchOutWindowCallback();
     protected:
         int initEngine(CfgLoader &cfgLoader);
         void stopEngine();
@@ -49,6 +51,14 @@ bool Engine::isKeyUp(){
         key_up = 0;
     }
     return ret;
+}
+
+void Engine::switchInWindowCallback(){
+    Traza::print(Traza::T_ALL, "Switching in callback");
+}
+
+void Engine::switchOutWindowCallback(){
+    Traza::print(Traza::T_ALL, "Switching out callback");
 }
 
 // Función para controlar la velocidad
@@ -147,6 +157,13 @@ int Engine::initEngine(CfgLoader &cfgLoader){
         }
     }
 
+    #ifdef WIN
+        set_display_switch_callback(SWITCH_IN, switchInWindowCallback);
+        set_display_switch_callback(SWITCH_OUT, switchOutWindowCallback);
+        set_display_switch_mode(SWITCH_BACKGROUND);
+    #endif
+
+
     //if (is_windowed_mode()) {
     //     /* Windowed mode stuff. */
     //} else {
@@ -170,6 +187,8 @@ int Engine::initEngine(CfgLoader &cfgLoader){
         snprintf(Traza::log_message, sizeof(Traza::log_message), "Error openning sound %s", allegro_error);
         Traza::print(Traza::T_ERROR);
     } 
+
+
     
     return 0;
 }
