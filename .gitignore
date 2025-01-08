@@ -50,11 +50,10 @@ Temporary Items
 gamescraper/target
 obj
 bin
-gamemenu/dep/*.zip
-gamemenu/dep/*.gz
-gamemenu/dep/*.bz2
+#gamemenu/dep/*.zip
+#gamemenu/dep/*.gz
+#gamemenu/dep/*.bz2
 gamemenu/dep/dosdev
-gamemenu/dep/freetype*
 gamemenu/gmenu/config/*.cfg
 gamemenu/gmenu/config/*.map
 gamemenu/gmenu/assets

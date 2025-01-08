@@ -89,6 +89,7 @@ LINUX DEPENDENCIES FOR NATIVE COMPILING
 ---------------------------------------
 
 * Install the dependencies:
+
 ```
 sudo pacman -S curl wget base-devel unzip allegro4 freetype2
 or 
@@ -96,10 +97,26 @@ sudo apt install curl wget build-essential unzip liballegro4-dev allegro4-doc li
 ```
 
 * Next, download allegro png from https://alpng.sourceforge.net and compile it:
+
 ```
 cd alpng13
 chmod 755 configure
 ./configure
+make
+```
+
+* Lastly, download allegro mp3 from https://sourceforge.net/projects/almp3/files/2.0.5/almp3-2.0.5.tar.xz/download and compile it:
+
+```
+cd almp3-2.0.5
+chmod 755 fixunix.sh
+./fixunix.sh
+#comment line 6 of the makefile representing the line: TARGET=DJGPP_STATIC
+sed -i '6s/^/#/' Makefile
+#uncomment line 9 of the makefile representing the line: TARGET=LINUX_STATIC
+sed -i '9s/^#//' Makefile
+#remove the text -march=pentium of the line 52
+sed -i '52s/-march=pentium//' Makefile
 make
 ```
 
@@ -167,7 +184,7 @@ cp dosdev/allegro/bin/lib/liballeg44.dll.a dosdev/allegro/bin/lib/liballeg.dll.a
 cp -fR dosdev/allegro/bin/* /mingw64
 ```
 
-* Lastly, download allegro png from https://alpng.sourceforge.net and compile it:
+* Next, download allegro png from https://alpng.sourceforge.net and compile it:
 
 ```
 mkdir -p dosdev/unix/alpng13
@@ -179,4 +196,15 @@ chmod 755 configure.bat
 make
 ```
 
+* Lastly, download allegro mp3 from https://sourceforge.net/projects/almp3/files/2.0.5/almp3-2.0.5.tar.xz/download and compile it:
 
+```
+cd almp3-2.0.5
+#comment line 6 of the makefile representing the line: TARGET=DJGPP_STATIC
+sed -i '6s/^/#/' Makefile
+#uncomment line 9 of the makefile representing the line: TARGET=MINGW32_STATIC
+sed -i '7s/^#//' Makefile
+#remove the text -march=pentium of the line 52
+sed -i '31s/-march=pentium//' Makefile
+make
+```
