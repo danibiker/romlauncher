@@ -27,7 +27,7 @@ class Sound{
             } 
         }
         ~Sound(){
-            cout << "deleting Sound" << endl;
+            Traza::print(Traza::T_DEBUG, "Deleting Sound...");
         }
 
         bool play(int soundid, bool wait){

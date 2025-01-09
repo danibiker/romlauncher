@@ -71,7 +71,7 @@ Joystick::Joystick(){
     memset(jbuttonsPrevStat, 0, sizeof(jbuttonsPrevStat));
 }
 Joystick::~Joystick(){ 
-    cout << "deleting Joystick" << endl;
+    Traza::print(Traza::T_DEBUG, "Deleting Joystick...");
     if (arrButtons != NULL){
         delete [] arrButtons;
         delete [] hats;

@@ -8,7 +8,9 @@
 class SOUtils{
     public :
         SOUtils(){};
-        ~SOUtils(){};
+        ~SOUtils(){
+            Traza::print(Traza::T_DEBUG, "Deleting SOUtils...");
+        };
         static string iniciarSistema(char** argv);
         static void waitms(unsigned long ms);
 };

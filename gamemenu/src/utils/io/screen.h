@@ -6,7 +6,7 @@ class Screen{
     public:
         Screen(){};
         ~Screen(){
-            cout << "deleting Screen" << endl;
+            Traza::print(Traza::T_DEBUG, "Deleting Screen...");
         };
 
         static int getScreenNumLines(){

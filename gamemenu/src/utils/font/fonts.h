@@ -13,7 +13,7 @@ class Fonts{
 
         Fonts(){}
         ~Fonts(){
-            cout << "deleting Traza" << endl;
+            Traza::print(Traza::T_DEBUG, "Deleting Fonts...");
             exit();
         }
 

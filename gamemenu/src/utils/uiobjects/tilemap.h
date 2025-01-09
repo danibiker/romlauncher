@@ -17,6 +17,7 @@ class TileMap {
         }
 
         ~TileMap(){
+            Traza::print(Traza::T_DEBUG, "Deleting TileMap...");
             destroy_bitmap(img);
         }
 

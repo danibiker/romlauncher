@@ -38,6 +38,8 @@ class GameMenu : public Engine{
         };
 
         ~GameMenu(){
+            Traza::print(Traza::T_DEBUG, "Deleting GameMenu...");
+            this->stopEngine();
         }
         
         void createMenuImages(ListMenu &);
@@ -447,7 +449,22 @@ void GameMenu::launchProgram(ListMenu &menuData){
         remove_sound();
     }
 
+    //if we are in fullscreen, switch to windowed, because the launched app maybe not 
+    //be showed in the first plane
+    bool isFullscreen = !is_windowed_mode();
+    #ifdef DOS
+        //In MSDOS we don't need to do the fullscreen switch
+        isFullscreen = false;
+    #endif
+
+    if (isFullscreen)
+        swithScreenFullWindow(*this->cfgLoader);
+
     launcher.launch(commands, cfgLoader->configMain.debug);
+
+    //if we were in fullscreen, switch back to fullscreen
+    if (isFullscreen)
+        swithScreenFullWindow(*this->cfgLoader);
     
     //Try to reactivate sound, although it's pointless in my tests. I couldn't make it to work with Alsa.
     //Install pipewire instead

@@ -29,6 +29,7 @@ class Engine{
         int initEngine(CfgLoader &cfgLoader);
         int initSound();
         void stopEngine();
+        void swithScreenFullWindow(CfgLoader &cfgLoader);
     private:
         static volatile int closeRequested;
         static volatile int key_up;
@@ -37,15 +38,24 @@ class Engine{
         static void keypress_watcher(int scancode);
 };
 
+/**
+ * 
+ */
 void Engine::stopEngine(){
     Fonts::exit();
     allegro_exit();
 }
 
+/**
+ * 
+ */
 int Engine::isCloseRequested(){
     return closeRequested;
 }
 
+/**
+ * 
+ */
 bool Engine::isKeyUp(){
     bool ret = key_up;
     //Now we reset the values
@@ -55,32 +65,49 @@ bool Engine::isKeyUp(){
     return ret;
 }
 
+/**
+ * 
+ */
 void Engine::switchInWindowCallback(){
     Traza::print(Traza::T_ALL, "Switching in callback");
 }
 
+/**
+ * 
+ */
 void Engine::switchOutWindowCallback(){
     Traza::print(Traza::T_ALL, "Switching out callback");
 }
 
-// Función para controlar la velocidad
+/**
+ * Función para controlar la velocidad de refresco de pantalla
+ */
 void Engine::incGameTimeCounter(){
     Constant::totalTicks++;
     gameTimeCounter++;
 }
 END_OF_FUNCTION(incGameTimeCounter)
 
+/**
+ * 
+ */
 void Engine::closeRequestedHandler(void){
     closeRequested = true;
 }
 END_OF_FUNCTION(closeRequestedHandler)
 
+/**
+ * 
+ */
 void Engine::keypress_watcher(int scancode){
     if (scancode & 0x80) {
         key_up = 1;
     } 
 } END_OF_FUNCTION(keypress_watcher)
 
+/**
+ * 
+ */
 int Engine::initSound(){
     Traza::print(Traza::T_DEBUG, "Installing sound...");
     if (install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0){
@@ -91,6 +118,30 @@ int Engine::initSound(){
     return 0;
 } 
 
+/**
+ * 
+ */
+void Engine::swithScreenFullWindow(CfgLoader &cfgLoader){
+    int card = GFX_AUTODETECT_WINDOWED;
+
+    if (is_windowed_mode()){
+        Traza::print(Traza::T_DEBUG, "Going fullscreen");
+        card = GFX_AUTODETECT_FULLSCREEN;
+    } else {
+        Traza::print(Traza::T_DEBUG, "Going windowed");
+    }
+
+    if (set_gfx_mode(card, cfgLoader.getWidth(), cfgLoader.getHeight(), 0, 0) != 0){
+        Traza::print(Traza::T_ERROR, "Going back to the origin windowed mode");
+        //Go back to the previous mode
+        set_gfx_mode(card == GFX_AUTODETECT_FULLSCREEN ? GFX_AUTODETECT_WINDOWED : GFX_AUTODETECT_FULLSCREEN, 
+            cfgLoader.getWidth(), cfgLoader.getHeight(), 0, 0);
+    }
+}
+
+/**
+ * 
+ */
 int Engine::initEngine(CfgLoader &cfgLoader){
     int colorDepth = 16;
 
@@ -193,7 +244,12 @@ int Engine::initEngine(CfgLoader &cfgLoader){
 
     joystick.init();
     //Sound::alsaInit();
-    initSound();
+    if (initSound() == 0){
+        //Init the music engine to play mp3
+        if (this->music.loadBG()){
+            this->music.playBG(0);
+        } 
+    }
 
     return 0;
 }

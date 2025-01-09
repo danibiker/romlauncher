@@ -28,7 +28,9 @@ using namespace std;
 class Launcher{
     public:
         Launcher(){};
-        ~Launcher(){};
+        ~Launcher(){
+            Traza::print(Traza::T_DEBUG, "Deleting Launcher...");
+        };
         bool lanzarProgramaUNIXFork(FileLaunch &emulInfo);
         bool launch(vector<string> &commands, bool debug);
         string descomprimirZIP(string filename);
@@ -123,13 +125,15 @@ bool Launcher::launch(vector<string> &commands, bool debug){
         char **argv = new char* [commands.size()+1];  
         size_t j = 0;
         size_t posDirSep;
+        Traza::print(Traza::T_ALL, "Launching command:");
+
         for (; j < commands.size(); j++){
             if (j==0 && ((posDirSep = commands[j].find_last_of(Constant::tempFileSep)) != string::npos)){
                 argv[j] = strdup(commands[j].substr(posDirSep + 1).c_str());
             } else {
                 argv[j] = strdup(commands[j].c_str());
             }
-            snprintf(Traza::log_message, sizeof(Traza::log_message),"argv[%s]=%s", std::to_string(j).c_str(), argv[j]);
+            snprintf(Traza::log_message, sizeof(Traza::log_message),"param_%s=%s", std::to_string(j).c_str(), argv[j]);
             Traza::print(Traza::T_ALL);
         }     
         // end of arguments sentinel is NULL
@@ -147,12 +151,14 @@ bool Launcher::launch(vector<string> &commands, bool debug){
             } else {
                 int ret;
                 wait(&ret); 
+                Traza::print(Traza::T_DEBUG, "Comando terminado");
             }        
         #else
             if (execv(commands[0].c_str(), argv) == -1){
                 Traza::print(Traza::T_ERROR, "No se ha podido ejecutar el programa");
                 return false;
             } else {
+                Traza::print(Traza::T_DEBUG, "Comando terminado");
                 return true;
             }
         #endif 
@@ -162,7 +168,8 @@ bool Launcher::launch(vector<string> &commands, bool debug){
         delete [] argv;
 
     } else if (Constant::getExecMethod() == launch_batch && dosbatch(commands, comando, debug) == 0){
-        cout << "Exiting to launch the game: " << comando << endl;
+        snprintf(Traza::log_message, sizeof(Traza::log_message), "Launching command -> %s", comando.c_str());
+        Traza::print(Traza::T_ALL);
         exit(0);
     }
     return launchOk;

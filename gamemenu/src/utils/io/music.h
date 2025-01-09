@@ -23,13 +23,11 @@ typedef struct {
 #define BUFSZ   (1<<16) /* (65536) size of audiostream buffer */
 #define DATASZ  (1<<15) /* (32768) amount of data to read from disk each time */
 
-class Music{
+typedef enum{ TRACKSTOP, TRACKPLAY, TRACKPAUSE, TRACKEND} enumMusicStatus;
 
+class Music{
     public:
-        static void auto_poll_mp3_file(void *p_mp3);
-        void init();
         Music(){
-            //musicLists[0] = Mp3Music{ NULL, 0 };
             init();
         }
         
@@ -37,28 +35,60 @@ class Music{
             closeAll();
         }
 
+        static void auto_poll_mp3_file(void *p_mp3);
+        void init();
         void closeAll();
         int loadBG();
         int playBG(int ntrack);
         void pauseBG(int ntrack);
         void rewindBG(int ntrack);
 
+        static int getStatus(){
+            return status;
+        }
+
     private:
         const int volume = 64;
         const int pan = 128;
-        MP3FILE **mp3;
+        static int status;
 
-        int poll_mp3_file(MP3FILE *mp3);
+        MP3FILE **mp3;
+        int poll_mp3_file(MP3FILE *mp3file);
         MP3FILE *open_mp3_file(const char *filename);
-        int play_mp3_file(MP3FILE *mp3, int buflen, int vol, int pan);
-        void close_mp3_file(MP3FILE *mp3);
+        int play_mp3_file(MP3FILE *mp3file, int buflen, int vol, int pan);
+        void close_mp3_file(MP3FILE *mp3file);
 };
 
-void Music::closeAll(){
-    cout << "deleting Music" << endl;
-    //almp3_destroy_mp3(musicLists[0].mp3); 
-    //free(data);
 
+/**
+ * 
+ */
+void Music::auto_poll_mp3_file(void *p_mp3) {   
+    MP3FILE *mp3file = (MP3FILE *)p_mp3;
+    char *data;
+    long len;
+
+    data = (char *)almp3_get_mp3stream_buffer(mp3file->s);
+    if (data) {       
+        len = pack_fread(data, DATASZ, mp3file->f);
+        if (len < DATASZ){
+            almp3_free_mp3stream_buffer(mp3file->s, len);
+            status = TRACKEND;
+        } else {
+            almp3_free_mp3stream_buffer(mp3file->s, -1);
+            status = TRACKPLAY;
+        }
+    }
+    almp3_poll_mp3stream(mp3file->s);
+}
+END_OF_STATIC_FUNCTION(auto_poll_mp3_file)
+
+
+/**
+ * 
+ */
+void Music::closeAll(){
+    Traza::print(Traza::T_DEBUG, "Deleting Music...");
     if (!mp3)
         return;
 
@@ -77,74 +107,61 @@ void Music::closeAll(){
 /**
  * 
  */
-void Music::auto_poll_mp3_file(void *p_mp3) {   
-    MP3FILE *mp3file = (MP3FILE *)p_mp3;
+void Music::init(){
+    mp3 = NULL;
+    status = TRACKSTOP;
+    LOCK_FUNCTION(auto_poll_mp3_file);
+}
+
+/**
+ * 
+ */
+int Music::poll_mp3_file(MP3FILE *mp3file) {
     char *data;
     long len;
 
     data = (char *)almp3_get_mp3stream_buffer(mp3file->s);
-    if (data) {       
-        //pack_fseek(mp3file->f, mp3file->filesize/2);
+    if (data) {
         len = pack_fread(data, DATASZ, mp3file->f);
-        //cout << "Reading stream from mp3 file" << endl;
-        if (len < DATASZ){
+        if (len < DATASZ)
             almp3_free_mp3stream_buffer(mp3file->s, len);
-        } else
+        else
             almp3_free_mp3stream_buffer(mp3file->s, -1);
     }
 
-    almp3_poll_mp3stream(mp3file->s);
-}
-END_OF_STATIC_FUNCTION(auto_poll_mp3_file)
-
-void Music::init(){
-    mp3 = NULL;
-    LOCK_FUNCTION(auto_poll_mp3_file);
-}
-
-int Music::poll_mp3_file(MP3FILE *mp3) {
-    char *data;
-    long len;
-
-    data = (char *)almp3_get_mp3stream_buffer(mp3->s);
-    if (data) {
-        len = pack_fread(data, DATASZ, mp3->f);
-        if (len < DATASZ)
-            almp3_free_mp3stream_buffer(mp3->s, len);
-        else
-            almp3_free_mp3stream_buffer(mp3->s, -1);
-    }
-
-    return almp3_poll_mp3stream(mp3->s);
+    return almp3_poll_mp3stream(mp3file->s);
 }
 
 /**
  * 
  */
 void Music::pauseBG(int ntrack){
-    MP3FILE *mp3file = mp3[ntrack];
-    if (almp3_is_playing_mp3stream(mp3file->s)){
-        almp3_stop_mp3stream(mp3file->s);
+    if (almp3_is_playing_mp3stream(mp3[ntrack]->s)){
+        almp3_stop_mp3stream(mp3[ntrack]->s);
         cout << "stoping" << endl;
-        if (mp3file->autopoll){
-            remove_param_int(&auto_poll_mp3_file, (void *)mp3file);
+        if (mp3[ntrack]->autopoll){
+            cout << "remove param" << endl;
+            remove_param_int(&auto_poll_mp3_file, (void *)mp3[ntrack]);
         }
     } else{
         cout << "It's already stopped" << endl;
     }
+    status = TRACKPAUSE;
 }
 
+/**
+ * 
+ */
 void Music::rewindBG(int ntrack){
-    MP3FILE *mp3file = mp3[ntrack];
-    string filepathRewind = mp3file->filepath;
+    string filepathRewind = mp3[ntrack]->filepath;
     if (filepathRewind.empty()){
         cout << "No filename to rewind: " << filepathRewind << endl;    
         return;
     }
     cout << "Rewinding file: " << filepathRewind << endl;
-    pauseBG(ntrack);
-    close_mp3_file(mp3file);
-    mp3file = open_mp3_file(filepathRewind.c_str());
+    remove_param_int(&auto_poll_mp3_file, (void *)mp3[ntrack]);
+    close_mp3_file(mp3[ntrack]);
+    mp3[ntrack] = open_mp3_file(filepathRewind.c_str());
     playBG(0);
 }
 
@@ -152,22 +169,24 @@ void Music::rewindBG(int ntrack){
  * 
  */
 int Music::playBG(int ntrack){
-
     /* get the number of total frames */
-    int total_frames = almp3_get_length_frames_mp3stream(mp3[ntrack]->s, 4);
-    int posBytes = almp3_seek_abs_frames_mp3stream(mp3[ntrack]->s, total_frames / 2, 0);
-    pack_fseek(mp3[ntrack]->f, posBytes);
-
+    //int total_frames = almp3_get_length_frames_mp3stream(mp3[ntrack]->s, 4);
+    //int posBytes = almp3_seek_abs_frames_mp3stream(mp3[ntrack]->s, total_frames / 2, 0);
+    //pack_fseek(mp3[ntrack]->f, posBytes);
 
     if (!almp3_is_playing_mp3stream(mp3[ntrack]->s) && play_mp3_file(mp3[ntrack], BUFSZ, volume, pan) == ALMP3_OK){
         //Code to play in a thread without blocking the interface
         mp3[ntrack]->autopoll = true;
         install_param_int(&auto_poll_mp3_file, (void *)mp3[0], 200);
+        status = TRACKPLAY;
         return 1;
     } 
     return 0;
 }
 
+/**
+ * 
+ */
 MP3FILE *Music::open_mp3_file(const char *filename) {
     MP3FILE *p = NULL;
     PACKFILE *f = NULL;
@@ -203,20 +222,28 @@ MP3FILE *Music::open_mp3_file(const char *filename) {
     return NULL;
 }
 
-
-int Music::play_mp3_file(MP3FILE *mp3, int buflen, int vol, int pan) {
-    return almp3_play_mp3stream(mp3->s, buflen, vol, pan);
+/**
+ * 
+ */
+int Music::play_mp3_file(MP3FILE *mp3file, int buflen, int vol, int pan) {
+    return almp3_play_mp3stream(mp3file->s, buflen, vol, pan);
 }
 
-
-void Music::close_mp3_file(MP3FILE *mp3) {
-    if (mp3) {
-        pack_fclose(mp3->f);
-        almp3_destroy_mp3stream(mp3->s);
-        free(mp3);
+/**
+ * 
+ */
+void Music::close_mp3_file(MP3FILE *mp3file) {
+    if (mp3file) {
+        pack_fclose(mp3file->f);
+        almp3_destroy_mp3stream(mp3file->s);
+        free(mp3file);
+        mp3file = NULL;
     }
 }
 
+/**
+ * 
+ */
 int Music::loadBG(){
     /*TODO: scan a directory of n files in it*/
     int n = 1;

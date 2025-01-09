@@ -38,6 +38,7 @@ class ListMenu : public Object{
         }
 
         ~ListMenu(){
+            Traza::print(Traza::T_DEBUG, "Deleting ListMenu...");
             clear();
         }
         

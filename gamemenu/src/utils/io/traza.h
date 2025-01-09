@@ -20,7 +20,6 @@ class Traza{
         }
 
         ~Traza(){
-            cout << "deleting Traza" << endl;
             close();
         }
         

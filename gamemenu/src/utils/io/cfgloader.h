@@ -16,7 +16,7 @@ class CfgLoader{
             loadMainConfig();
         }
         ~CfgLoader(){
-            cout << "deleting CfgLoader" << endl;
+            Traza::print(Traza::T_DEBUG, "Deleting CfgLoader...");
         }
         
         int getWidth(){

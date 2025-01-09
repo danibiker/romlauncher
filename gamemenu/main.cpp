@@ -53,14 +53,21 @@ FILE * Traza::fp = NULL; // separate definition
 char Traza::log_message[512];
 int Traza::level = Traza::T_ERROR;
 const string CfgLoader::CONFIGFILE = "gmenu.cfg";
+int Music::status = TRACKSTOP;
 
 void processKeys(ListMenu &, GameMenu &);
 
+/**
+ * 
+ */
 void drawFps(BITMAP *video_page){
     ALFONT_FONT *fontsmall = Fonts::getFont(Fonts::FONTSMALL);
     Constant::drawText(video_page, fontsmall, std::to_string(fps).c_str(), 0, fontsmall->face_h , Constant::textColor, -1);
 }
 
+/**
+ * 
+ */
 void updateScreen(TileMap &tileMap, ListMenu &menuData, GameMenu &gameMenu, bool keypress){
     if (menuData.animateBkg) tileMap.draw(gameMenu.video_page);
     else clear_to_color(gameMenu.video_page, Constant::backgroundColor);
@@ -100,12 +107,6 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
 
     bool exit = false;
     Sound sound;
-    //Init the music engine to play mp3
-    if (gameMenu.music.loadBG()){
-        gameMenu.music.playBG(0);
-    } 
-
-    //Focus::setFocus();
 
     while (!exit && !gameMenu.isCloseRequested()) {
         //If resizing detected
@@ -129,21 +130,21 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
         }
 
         if (gameMenu.gameTimeCounter){
-            gameMenu.joystick.readJoystick();
 
+            if (gameMenu.music.getStatus() == TRACKEND){
+                gameMenu.music.rewindBG(0);
+            }
+
+            gameMenu.joystick.readJoystick();
             if ((keypressed() && readkey()) || gameMenu.joystick.isJoyPressed()){
                 if (key[KEY_ESC] || (gameMenu.joystick.getButtonStat(gameMenu.joystick.J_SELECT) && gameMenu.joystick.getButtonStat(gameMenu.joystick.J_START))){
                     exit = true;
                 } else if (key[KEY_ENTER] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_A)){
                     gameMenu.music.pauseBG(0);
-                    //gameMenu.music.closeAll();
                     sound.play(SBTNLOAD, true);
                     gameMenu.joystick.resetButtons();
                     gameMenu.launchProgram(menuData);
-                    
-                    //if (gameMenu.music.loadBG()){
-                        gameMenu.music.playBG(0);
-                    //} 
+                    gameMenu.music.playBG(0);
                 } else {
                     if (key[KEY_P]){
                         gameMenu.music.pauseBG(0);
@@ -156,7 +157,6 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
                     if (key[KEY_UP] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_UP)){
                         menuData.prevPos();
                         sound.play(SBTNCLICK);
-                        //updateScreen(tileMap, menuData, gameMenu, true, animateBkg);
                     }
                     if (key[KEY_DOWN] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_DOWN)){
                         menuData.nextPos();
@@ -273,11 +273,7 @@ int main(int argc, char *argv[]){
 
     Traza::print(Traza::T_DEBUG, "Processing keys...");
     processKeys(listMenu, gameMenu);
-    remove_keyboard();
-    remove_timer();
-    Fonts::exit();
     allegro_exit();
-    Traza::close();
     return 0;
 }
 END_OF_MAIN()

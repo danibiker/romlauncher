@@ -18,6 +18,7 @@ class TextArea : public Object{
         }
 
         ~TextArea(){
+            Traza::print(Traza::T_DEBUG, "Deleting TextArea...");
             lines.clear();
         }
 
