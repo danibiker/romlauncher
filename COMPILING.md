@@ -170,12 +170,14 @@ cmake-gui ..
 ```
 
 On the cmake-gui frontend:
+```
 	1. Press configure and select 'MSYS Makefiles' on the combo
 	2. Set MAKE_BUILD_TYPE to Release
 	3. Uncheck WANT_TESTS
 	4. Set the CMAKE_INSTALL_PREFIX to dosdev/allegro/bin
 	5. Press configure and Generate
 	6. Exit and let the script continue
+```
 
 ```
 make
