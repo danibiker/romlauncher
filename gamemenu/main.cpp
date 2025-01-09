@@ -54,8 +54,9 @@ char Traza::log_message[512];
 int Traza::level = Traza::T_ERROR;
 const string CfgLoader::CONFIGFILE = "gmenu.cfg";
 int Music::status = TRACKSTOP;
+BITMAP* ListMenu::imgText = NULL;
 
-void processKeys(ListMenu &, GameMenu &);
+void processKeys(ListMenu &, GameMenu &, CfgLoader &);
 
 /**
  * 
@@ -82,7 +83,7 @@ void updateScreen(TileMap &tileMap, ListMenu &menuData, GameMenu &gameMenu, bool
 /**
  * 
  */
-void processKeys(ListMenu &menuData, GameMenu &gameMenu){
+void processKeys(ListMenu &menuData, GameMenu &gameMenu, CfgLoader &cfgLoader){
     struct ListStatus menuBeforeExit;
     int retMenu = gameMenu.recoverGameMenuPos(menuData, menuBeforeExit);
     if (retMenu == 0){
@@ -109,19 +110,6 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
     Sound sound;
 
     while (!exit && !gameMenu.isCloseRequested()) {
-        //If resizing detected
-        //if (menuData.maxLines != menuData.getScreenNumLines() - 1){
-        //    menuData.maxLines = menuData.getScreenNumLines() - 1;
-        //    menuData.endPos = (int)menuData.getNumGames() > menuData.maxLines ? menuData.maxLines : menuData.getNumGames();
-        //    //clear_to_color(gameMenu.video_page, Constant::backgroundColor);
-        //    updateScreen(tileMap, menuData, gameMenu, true, animateBkg);
-        //}
-        //if (Focus::notFocused()){
-        //    gameMenu.music.pauseBG(0);
-        //    gameMenu.music.closeAll();
-        //    cout << "lost focus" << endl;
-        //}
-        
         gameMenu.gameTimeCounter = !limitFps ? 1 : gameMenu.gameTimeCounter;
 
         static uint32_t lastGameTick = Constant::getTicks();
@@ -130,30 +118,33 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
         }
 
         if (gameMenu.gameTimeCounter){
-
-            if (gameMenu.music.getStatus() == TRACKEND){
-                gameMenu.music.rewindBG(0);
+            if (cfgLoader.configMain.background_music > 0 && gameMenu.music.getStatus() == TRACKEND){
+                gameMenu.music.pauseBG();
+                gameMenu.music.rewindBG(gameMenu.music.getNextSongIndex());
             }
 
             gameMenu.joystick.readJoystick();
             if ((keypressed() && readkey()) || gameMenu.joystick.isJoyPressed()){
                 if (key[KEY_ESC] || (gameMenu.joystick.getButtonStat(gameMenu.joystick.J_SELECT) && gameMenu.joystick.getButtonStat(gameMenu.joystick.J_START))){
+                    //Exit launcher
                     exit = true;
+                } else if ((key[KEY_ENTER] && (key_shifts & KB_ALT_FLAG))){
+                    //Switch fullscreen or windowed
+                    gameMenu.swithScreenFullWindow(cfgLoader, true);
+                    gameMenu.initDblBuffer(SCREEN_W, SCREEN_H);
+                    Fonts::exit();
+                    Fonts::init();
+                    Fonts::initFonts(SCREEN_H / SCREENHDIV);
+                    menuData.setLayout(menuData.layout, SCREEN_W, SCREEN_H);
+                    gameMenu.createMenuImages(menuData);
                 } else if (key[KEY_ENTER] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_A)){
-                    gameMenu.music.pauseBG(0);
+                    //Launching games
+                    gameMenu.music.pauseBG();
                     sound.play(SBTNLOAD, true);
                     gameMenu.joystick.resetButtons();
                     gameMenu.launchProgram(menuData);
-                    gameMenu.music.playBG(0);
+                    gameMenu.music.playBG();
                 } else {
-                    if (key[KEY_P]){
-                        gameMenu.music.pauseBG(0);
-                    } else if (key[KEY_S]){
-                        gameMenu.music.playBG(0);
-                    } else if (key[KEY_R]){
-                        gameMenu.music.rewindBG(0);
-                    }
-
                     if (key[KEY_UP] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_UP)){
                         menuData.prevPos();
                         sound.play(SBTNCLICK);
@@ -171,32 +162,39 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu){
                         sound.play(SBTNCLICK);
                     }
                     if ((key[KEY_TAB] && !(key_shifts & KB_SHIFT_FLAG)) || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_RB)){
+                        //Change to prev emulator
                         sound.play(SBTNCLICK);
                         gameMenu.showMessage("Refreshing gamelist...");
                         gameMenu.getNextCfgEmu();
                         gameMenu.loadEmuCfg(menuData);
                     }
                     if ( (key[KEY_TAB] && (key_shifts & KB_SHIFT_FLAG)) || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_LB)){
+                        //Change to next emulator
                         sound.play(SBTNCLICK);
                         gameMenu.showMessage("Refreshing gamelist...");
                         gameMenu.getPrevCfgEmu();
                         gameMenu.loadEmuCfg(menuData);
                     } 
                     if (key[KEY_F2]){
+                        //Change the layout
                         sound.play(SBTNCLICK);
                         gameMenu.showMessage("Changing layout...");
                         menuData.setLayout((menuData.layout + 1) % 3, SCREEN_W, SCREEN_H);
                         menuData.animateBkg = menuData.layout == LAYBOXES;
                     } else if (key[KEY_F3]){
+                        //Change the background
                         sound.play(SBTNCLICK);
                         tileMap.findTile((tileMap.tileX + 1) % 27, 0);
                     } else if (key[KEY_F4]){
+                        //Stop the background
                         sound.play(SBTNCLICK);
                         menuData.animateBkg = !menuData.animateBkg;
                     } else if (key[KEY_F5]){
+                        //Limit fps
                         sound.play(SBTNCLICK);
                         limitFps = !limitFps;
                     }           
+
                 }
             }
             menuData.keyUp = gameMenu.isKeyUp() || gameMenu.joystick.isJoyReleased();
@@ -253,7 +251,7 @@ int main(int argc, char *argv[]){
         Constant::drawTextCentre(screen, fontsmall, "Creating bitmap buffer...", SCREEN_W / 2, SCREEN_H / 2, Constant::textColor, Constant::backgroundColor);
 
     Traza::print(Traza::T_DEBUG, "Creating bitmap buffer...");
-    if (!gameMenu.initDblBuffer()){
+    if (!gameMenu.initDblBuffer(cfgLoader.getWidth(), cfgLoader.getHeight())){
         Traza::print(Traza::T_ERROR, "Could not create bitmap");
         return 1;
     }
@@ -272,7 +270,7 @@ int main(int argc, char *argv[]){
     }
 
     Traza::print(Traza::T_DEBUG, "Processing keys...");
-    processKeys(listMenu, gameMenu);
+    processKeys(listMenu, gameMenu, cfgLoader);
     allegro_exit();
     return 0;
 }

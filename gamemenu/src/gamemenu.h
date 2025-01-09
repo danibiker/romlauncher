@@ -33,6 +33,7 @@ class GameMenu : public Engine{
         GameMenu(CfgLoader *cfgLoader){
             emuCfgPos = 0;
             gameTicks.ticks = 0;
+            video_page = NULL;
             this->cfgLoader = cfgLoader;
             this->initEngine(*cfgLoader);
         };
@@ -47,9 +48,12 @@ class GameMenu : public Engine{
         void refreshScreen(ListMenu &);
         void launchProgram(ListMenu &);
         
-        bool initDblBuffer(){
+        bool initDblBuffer(int w, int h){
+            if (video_page != NULL){
+                destroy_bitmap(video_page);
+            }
             /* Create bitmap for page flipping */
-            video_page = create_bitmap(cfgLoader->getWidth(), cfgLoader->getHeight());
+            video_page = create_bitmap(w, h);
             return video_page != NULL;
         }
         
@@ -109,6 +113,8 @@ void GameMenu::createMenuImages(ListMenu &listMenu){
     const int snapH = listMenu.getH() / 2;
     const int snapOffset = SCREEN_W / 10;
     //const int snapOffset = 5;
+    menuImages.clear();
+    menuTextAreas.clear();
 
     if (SCREEN_W / 2 >= 320){
         imageSnap.setX(SCREEN_W / 2 + snapOffset);
@@ -170,7 +176,7 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
         if (!game->shortFileName.empty()){
             if (listMenu.layout == LAYBOXES) {
                 Constant::drawTextCentre(this->video_page, fontBig, emu.name.c_str(), 
-                    cfgLoader->getWidth() / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
+                    SCREEN_W / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
                 
                 static const int menuBars = makecol(128, 128, 128);
                 fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1 , SCREEN_W - listMenu.marginX, listMenu.marginY - 1, menuBars);
@@ -219,13 +225,13 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
                 menuImages[SNAPFS].printImage(this->video_page);
                 //Draw the menu element after the image
                 alfont_textout_centre_ex(this->video_page, fontBig, emu.name.c_str(), 
-                    cfgLoader->getWidth() / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
+                    SCREEN_W / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
                 fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1, listMenu.getW(), listMenu.marginY - 1, Constant::textColor);
                 listMenu.draw(this->video_page);
 
             } else if (listMenu.layout == LAYTEXT) {
                 alfont_textout_centre_ex(this->video_page, fontBig, emu.name.c_str(), 
-                    cfgLoader->getWidth() / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
+                    SCREEN_W / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
                 fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1, listMenu.getW(), listMenu.marginY - 1, Constant::textColor);
                 listMenu.draw(this->video_page);
             }

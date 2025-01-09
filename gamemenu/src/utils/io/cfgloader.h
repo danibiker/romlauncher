@@ -53,49 +53,51 @@ class CfgLoader{
 
             string filepath = Constant::getAppDir() + string(Constant::tempFileSep) + CONFIGFILE;
 
-            //if (dir.fileExists(filepath.c_str()) && !dir.isDir(filepath.c_str())){
-                fstream emucfg;
-                emucfg.open(filepath, ios::in);
+            fstream emucfg;
+            emucfg.open(filepath, ios::in);
 
-                bool fileopened = emucfg.is_open();
-                if (fileopened){
-                    string line;
-                    while(getline(emucfg, line)){
-                        line = Constant::Trim(Constant::replaceAll(Constant::replaceAll(line, "\r", ""), "\n", ""));
-                        if (line.length() > 1 && line.at(0) != '#' && line.find("=") != string::npos){
-                            vector<string> keyvalue = Constant::splitChar(line, '=');
-                            if (keyvalue.size() < 2)
-                                continue;
+            bool fileopened = emucfg.is_open();
+            if (fileopened){
+                string line;
+                while(getline(emucfg, line)){
+                    line = Constant::Trim(Constant::replaceAll(Constant::replaceAll(line, "\r", ""), "\n", ""));
+                    if (line.length() > 1 && line.at(0) != '#' && line.find("=") != string::npos){
+                        vector<string> keyvalue = Constant::splitChar(line, '=');
+                        if (keyvalue.size() < 2)
+                            continue;
 
-                            string key = Constant::Trim(keyvalue.at(0));
-                            string value = Constant::Trim(keyvalue.at(1));
+                        string key = Constant::Trim(keyvalue.at(0));
+                        string value = Constant::Trim(keyvalue.at(1));
 
-                            if (key.compare("emulators") == 0){
-                                configMain.emulators = Constant::splitChar(value, ' '); 
-                            } else if (key.compare("debug") == 0){
-                                configMain.debug = value.compare("yes") == 0 ? true : false ; 
-                            } else if (key.compare("path_prefix") == 0){
-                                configMain.path_prefix = value;
-                            } else if (key.compare("resolution") == 0){
-                                vector<string> res = Constant::splitChar(value, ' ');
-                                configMain.resolution[0] = Constant::strToTipo<int>(res[0]);
-                                configMain.resolution[1] = Constant::strToTipo<int>(res[1]);
-                            } else if (key.compare("alsa_reset") == 0){
-                                configMain.alsaReset = value.compare("yes") == 0 ? true : false ; 
-                            }
+                        if (key.compare("emulators") == 0){
+                            configMain.emulators = Constant::splitChar(value, ' '); 
+                        } else if (key.compare("debug") == 0){
+                            configMain.debug = value.compare("yes") == 0 ? true : false ; 
+                        } else if (key.compare("path_prefix") == 0){
+                            configMain.path_prefix = value;
+                        } else if (key.compare("resolution") == 0){
+                            vector<string> res = Constant::splitChar(value, ' ');
+                            configMain.resolution[0] = Constant::strToTipo<int>(res[0]);
+                            configMain.resolution[1] = Constant::strToTipo<int>(res[1]);
+                        } else if (key.compare("alsa_reset") == 0){
+                            configMain.alsaReset = value.compare("yes") == 0 ? true : false ; 
+                        } else if (key.compare("background_music") == 0){
+                            configMain.background_music = Constant::strToTipo<int>(value);
+                        } else if (key.compare("mp3_file") == 0){
+                            configMain.mp3_file = value;
                         }
                     }
                 }
-                emucfg.close();
+            }
+            emucfg.close();
 
-                if (fileopened){
-                    if (configMain.debug) cout << "Loading emulators:" << flush;
-                    for (size_t i=0; i < configMain.emulators.size(); i++){
-                        loadEmuConfig(configMain.emulators.at(i));
-                    }
-                    if (configMain.debug) cout << endl;
+            if (fileopened){
+                if (configMain.debug) cout << "Loading emulators:" << flush;
+                for (size_t i=0; i < configMain.emulators.size(); i++){
+                    loadEmuConfig(configMain.emulators.at(i));
                 }
-            //}
+                if (configMain.debug) cout << endl;
+            }
         }
 
         /**

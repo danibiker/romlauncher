@@ -88,6 +88,8 @@ class ConfigMain{
         debug = false;
         path_prefix = "";
         alsaReset = false;
+        background_music = 0;
+        mp3_file = "";
     }
     ~ConfigMain(){
     }
@@ -96,6 +98,8 @@ class ConfigMain{
     string path_prefix;
     int resolution[2];
     bool alsaReset;
+    int background_music;
+    string mp3_file;
 };
 
 class ConfigEmu{

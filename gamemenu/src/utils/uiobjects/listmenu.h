@@ -19,6 +19,14 @@ class ListMenu : public Object{
     private:
         const int waitTitleMove = 4000;
         const int frameTimeText = 1000 / 20.0;
+
+        void clearSelectedText(){
+            if (imgText != NULL){
+                destroy_bitmap(imgText);
+                imgText = NULL;
+            }
+        }
+
     public:
         ListMenu(int screenw, int screenh){
             iniPos = 0;
@@ -56,6 +64,7 @@ class ListMenu : public Object{
         int lastSel;
         float pixelShift;
         vector<unique_ptr<GameFile>> listGames;
+        static BITMAP* imgText;
         
         void clear(){
             if (listGames.size() > 0)
@@ -75,6 +84,9 @@ class ListMenu : public Object{
          * 
          */
         void setLayout(int layout, int screenw, int screenh){
+            this->marginY = screenh / SCREENHDIV * 1.5;
+            clearSelectedText();
+
             if (layout == LAYBOXES){
                 this->setX(marginX);
                 this->setY(marginY);
@@ -109,7 +121,6 @@ class ListMenu : public Object{
             static int colorTrans = makecol(247, 221, 114);
 
             ALFONT_FONT *fontMenu = Fonts::getFont(Fonts::FONTBIG);
-            static BITMAP* imgText = NULL;
             const int centerPos = this->getX() + this->getW() / 2;
 
             for (int i=this->iniPos; i < this->endPos; i++){
@@ -143,10 +154,7 @@ class ListMenu : public Object{
                     static uint32_t lastTick = Constant::getTicks();
 
                     if (lastSel != this->curPos && i == this->curPos){
-                        if (imgText != NULL){
-                            destroy_bitmap(imgText);
-                            imgText = NULL;
-                        }
+                        clearSelectedText();
                         const int txtMaxWidth = alfont_text_length(Fonts::getFont(Fonts::FONTBIG), line.substr(0, game->cutTitleIdx).c_str());
                         const int txtTotalWidth = alfont_text_length(Fonts::getFont(Fonts::FONTBIG), line.c_str());
                         txtDifWidth = txtTotalWidth - txtMaxWidth;
@@ -175,8 +183,6 @@ class ListMenu : public Object{
                 if (this->centerText){
                     alfont_textout_centre_ex(video_page, fontMenu, line.c_str(), centerPos, 
                         this->getY() + fontHeightRect, lineTextColor, lineBackground);
-                    //textout_centre_ex(video_page, font, line.c_str(), centerPos, 
-                    //    this->getY() + fontHeightRect, lineTextColor, lineBackground);
                 } else {
                     if (layout == LAYBOXES && i == this->curPos && imgText != NULL){
                         //masked_blit for transparent surfaces with pink background

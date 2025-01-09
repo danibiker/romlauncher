@@ -256,7 +256,7 @@ unsigned int dirutil::listarFilesSuperFast(const char *strdir, vector<unique_ptr
                             propFile.ico = findIcon(dirp->d_name);
                             propFile.filetype = TIPOFICHERO;
                         }
-                        filelist.push_back(make_unique<FileProps>(propFile));
+                        filelist.emplace_back(make_unique<FileProps>(propFile));
                     }
                 //}
             }

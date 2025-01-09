@@ -35,10 +35,8 @@ import java.io.Writer;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,7 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -175,6 +172,7 @@ public class App
 	JComboBox<ScrapeLang> cmbLang;
 	JCheckBox chkMediaSize;
 	JLabel lblDownProgress;
+	JComboBox<MusicOptions> cmbMusic;
 	//private final Map<Integer, IndexColorModel> colorModel = new HashMap<>();
 	ResourceBundle rb;
 	
@@ -201,6 +199,7 @@ public class App
 	private JList<ScrapSystem> listSystemsToScrap;
 	private JTextField txtMediaW;
 	private JTextField txtMediaH;
+	private JTextField txtPlayMusicFile;
 	
 	//Declare list as an enum
     private enum WEBS_SCRAPE
@@ -266,6 +265,19 @@ public class App
     @NoArgsConstructor
     private class ScrapeLang{
     	String id;
+    	String desc;
+    	
+    	 public String toString() {
+		    return getDesc();
+		 }
+    }
+    
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private class MusicOptions{
+    	int id;
     	String desc;
     	
     	 public String toString() {
@@ -388,6 +400,8 @@ public class App
 			txtDirToReplace.setText(cfgGeneral.getConvert_prefix_dst());
 			txtDirReplaced.setEnabled(chkConvert.isSelected());
 			txtDirToReplace.setEnabled(chkConvert.isSelected());
+			cmbMusic.setSelectedIndex(cfgGeneral.getBackground_music().isEmpty() ? 0 : Integer.parseInt(cfgGeneral.getBackground_music()));
+			txtPlayMusicFile.setText(cfgGeneral.getMp3_file());
 			
 			if (dirCfg.exists() && dirCfg.isDirectory()) {
 				for (File file : dirCfg.listFiles(file -> file.getName().toLowerCase().endsWith(".cfg"))) {
@@ -456,7 +470,7 @@ public class App
 		layeredPane.addComponentListener(new ResizeListener());
 		
 		pnlMain = new JPanel();
-		pnlMain.setBounds(0, 0, 319, 461);
+		pnlMain.setBounds(0, 0, 584, 503);
 		pnlMain.setLayout(new CardLayout(0, 0));
 		
 		tabsMain = new JTabbedPane(SwingConstants.TOP);
@@ -533,45 +547,45 @@ public class App
 		pnlGeneral.add(btnAddEmu);
 
 		chkDebug = new JCheckBox(rb.getString("lbl.debug"));
-		chkDebug.setBounds(147, 122, 129, 23);
+		chkDebug.setBounds(12, 118, 129, 23);
 		pnlGeneral.add(chkDebug);
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, rb.getString("lbl.resolution"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(12, 122, 127, 88);
+		panel.setBounds(12, 149, 127, 88);
 		pnlGeneral.add(panel);
 		panel.setLayout(null);
 		
 		JLabel lblAncho = new JLabel(rb.getString("res.width"));
-		lblAncho.setBounds(12, 24, 43, 15);
+		lblAncho.setBounds(12, 38, 43, 15);
 		panel.add(lblAncho);
 		
 		JLabel lblAlto = new JLabel(rb.getString("res.height"));
-		lblAlto.setBounds(70, 24, 57, 15);
+		lblAlto.setBounds(68, 38, 59, 15);
 		panel.add(lblAlto);
 		
 		txtH = new JTextField();
 		txtH.setText("240");
 		txtH.setHorizontalAlignment(SwingConstants.CENTER);
 		txtH.setColumns(10);
-		txtH.setBounds(70, 44, 43, 19);
+		txtH.setBounds(70, 57, 43, 19);
 		panel.add(txtH);
 		
 		JLabel lblX = new JLabel("x");
-		lblX.setBounds(58, 46, 7, 15);
+		lblX.setBounds(58, 59, 7, 15);
 		panel.add(lblX);
 		
 		txtW = new JTextField();
 		txtW.setText("320");
 		txtW.setHorizontalAlignment(SwingConstants.CENTER);
 		txtW.setColumns(10);
-		txtW.setBounds(12, 44, 43, 19);
+		txtW.setBounds(12, 57, 43, 19);
 		panel.add(txtW);
 		iconSave = IconFontSwing.buildIcon(FontAwesome.FLOPPY_O, 20, new Color(0, 0, 0));
 		
 		panel_1 = new JPanel();
 		panel_1.setBorder(new TitledBorder(null, rb.getString("lbl.saveconvert"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_1.setBounds(12, 222, 771, 170);
+		panel_1.setBounds(12, 249, 771, 170);
 		pnlGeneral.add(panel_1);
 		panel_1.setLayout(null);
 		
@@ -625,6 +639,35 @@ public class App
 		chkConvert.setBounds(12, 34, 25, 23);
 		panel_1.add(chkConvert);
 		
+		JPanel panel_4 = new JPanel();
+		panel_4.setLayout(null);
+		panel_4.setBorder(new TitledBorder(new LineBorder(new Color(184, 207, 229)), "M\u00FAsica", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(51, 51, 51)));
+		panel_4.setBounds(151, 149, 630, 88);
+		pnlGeneral.add(panel_4);
+		
+		cmbMusic = new JComboBox<>();
+		cmbMusic.setBounds(12, 52, 262, 24);
+		fillMusicCombo(cmbMusic);
+		panel_4.add(cmbMusic);
+		cmbMusic.addActionListener (e -> {
+			MusicOptions optMusic = (MusicOptions)cmbMusic.getSelectedItem();
+			txtPlayMusicFile.setEnabled(optMusic.id == 0 ? false : true);
+		});
+		
+		txtPlayMusicFile = new JTextField();
+		txtPlayMusicFile.setEnabled(false);
+		txtPlayMusicFile.setColumns(10);
+		txtPlayMusicFile.setBounds(286, 51, 195, 25);
+		panel_4.add(txtPlayMusicFile);
+		
+		JLabel lblBgMusicType = new JLabel(rb.getString("lbl.musictype"));
+		lblBgMusicType.setBounds(12, 30, 195, 15);
+		panel_4.add(lblBgMusicType);
+		
+		JLabel lblBgForceMp3 = new JLabel(rb.getString("lbl.forcemp3"));
+		lblBgForceMp3.setBounds(286, 29, 195, 15);
+		panel_4.add(lblBgForceMp3);
+		
 		pnlScrapper = new JPanel();
 		pnlScrapper.setVisible(true);
 		pnlScrapper.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
@@ -634,14 +677,14 @@ public class App
 		frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		windowScrapper = new JInternalFrame(rb.getString("lbl.media.obtain"));
 		windowScrapper.setResizable(true);
-		windowScrapper.setBounds(424, 12, 362, 431);
+		windowScrapper.setBounds(623, 12, 362, 431);
 		windowScrapper.setClosable(true);
 		windowScrapper.getContentPane().add(pnlScrapper, BorderLayout.CENTER);
 		windowScrapper.setVisible(false);
 		layeredPane.setLayout(null);
 		
 		JInternalFrame winDownloadStatus = new JInternalFrame(rb.getString("lbl.media.downloading"));
-		winDownloadStatus.setBounds(-27, 343, 374, 165);
+		winDownloadStatus.setBounds(424, 385, 374, 165);
 		layeredPane.add(winDownloadStatus);
 		winDownloadStatus.getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -842,6 +885,17 @@ public class App
     	}
 	}
     
+	public int fillMusicCombo(JComboBox<MusicOptions> combo) {
+		DefaultComboBoxModel<MusicOptions> comboBoxModel = new DefaultComboBoxModel<>();
+		
+		//Locale locale = Locale.getDefault();
+    	comboBoxModel.addElement(new MusicOptions(0, rb.getString("cmb.music.none")));
+		comboBoxModel.addElement(new MusicOptions(1, rb.getString("cmb.music.dirfiles")));
+    	combo.setModel(comboBoxModel);
+		
+		return comboBoxModel.getSize();
+	}
+	
     /**
      * 
      * @param combo
@@ -885,7 +939,7 @@ public class App
 		try {
 			final int x = (frame.getWidth() - winDownloadStatus.getWidth()) / 2;
 			final int y = (frame.getHeight() - winDownloadStatus.getHeight()) / 2;
-			winDownloadStatus.setBounds(x, y, winDownloadStatus.getBounds().width, winDownloadStatus.getBounds().height);
+			//winDownloadStatus.setBounds(x, y, winDownloadStatus.getBounds().width, winDownloadStatus.getBounds().height);
 			winDownloadStatus.setSelected(true);
 		} catch (PropertyVetoException e1) {
 			logger.log(Level.SEVERE, String.format("window not selectable %s", e1.getMessage()));
@@ -1870,6 +1924,8 @@ public class App
 				writer.write("convert_enable = " + checkCfgVal(chkConvert) + newLine);
 				writer.write("convert_prefix_src = " + txtDirReplaced.getText() + newLine);
 				writer.write("convert_prefix_dst = " + txtDirToReplace.getText() + newLine);
+				writer.write("background_music = " + cmbMusic.getSelectedIndex() + newLine);
+				writer.write("mp3_file = " + txtPlayMusicFile.getText() + newLine);
 				
 				File fileCfg = new File(txtPrefix.getText() + File.separator + GMENU + File.separator + GMENU_CFG);
 				CfgFile.loadConfig(fileCfg, cfgGeneral);

@@ -25,11 +25,11 @@ class Engine{
         static void incGameTimeCounter();
         static void switchInWindowCallback();
         static void switchOutWindowCallback();
+        void swithScreenFullWindow(CfgLoader &cfgLoader, bool userRequest = false);
     protected:
         int initEngine(CfgLoader &cfgLoader);
         int initSound();
         void stopEngine();
-        void swithScreenFullWindow(CfgLoader &cfgLoader);
     private:
         static volatile int closeRequested;
         static volatile int key_up;
@@ -121,17 +121,29 @@ int Engine::initSound(){
 /**
  * 
  */
-void Engine::swithScreenFullWindow(CfgLoader &cfgLoader){
+void Engine::swithScreenFullWindow(CfgLoader &cfgLoader, bool userRequest){
     int card = GFX_AUTODETECT_WINDOWED;
+    int w = cfgLoader.getWidth();
+    int h = cfgLoader.getHeight();
 
     if (is_windowed_mode()){
         Traza::print(Traza::T_DEBUG, "Going fullscreen");
         card = GFX_AUTODETECT_FULLSCREEN;
+        int tmpW, tmpH;
+        if (get_desktop_resolution(&tmpW, &tmpH) == 0){
+            w = tmpW;
+            h = tmpH;
+        }
     } else {
         Traza::print(Traza::T_DEBUG, "Going windowed");
+        int tmpW, tmpH;
+        if (userRequest && get_desktop_resolution(&tmpW, &tmpH) == 0 && w == tmpW && h == tmpH){
+            w = 640;
+            h = 480;
+        }
     }
 
-    if (set_gfx_mode(card, cfgLoader.getWidth(), cfgLoader.getHeight(), 0, 0) != 0){
+    if (set_gfx_mode(card, w, h, 0, 0) != 0){
         Traza::print(Traza::T_ERROR, "Going back to the origin windowed mode");
         //Go back to the previous mode
         set_gfx_mode(card == GFX_AUTODETECT_FULLSCREEN ? GFX_AUTODETECT_WINDOWED : GFX_AUTODETECT_FULLSCREEN, 
@@ -246,8 +258,8 @@ int Engine::initEngine(CfgLoader &cfgLoader){
     //Sound::alsaInit();
     if (initSound() == 0){
         //Init the music engine to play mp3
-        if (this->music.loadBG()){
-            this->music.playBG(0);
+        if (cfgLoader.configMain.background_music > 0 && this->music.loadBG(cfgLoader)){
+            this->music.playBG();
         } 
     }
 

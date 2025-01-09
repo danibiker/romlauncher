@@ -19,4 +19,6 @@ public class ConfigGeneral {
 	boolean convert_enable;
 	String convert_prefix_src;
 	String convert_prefix_dst;
+	String background_music;
+	String mp3_file;
 }
