@@ -129,14 +129,16 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu, CfgLoader &cfgLoader){
                     //Exit launcher
                     exit = true;
                 } else if ((key[KEY_ENTER] && (key_shifts & KB_ALT_FLAG))){
-                    //Switch fullscreen or windowed
-                    gameMenu.swithScreenFullWindow(cfgLoader, true);
-                    gameMenu.initDblBuffer(SCREEN_W, SCREEN_H);
-                    Fonts::exit();
-                    Fonts::init();
-                    Fonts::initFonts(SCREEN_H / SCREENHDIV);
-                    menuData.setLayout(menuData.layout, SCREEN_W, SCREEN_H);
-                    gameMenu.createMenuImages(menuData);
+                    #ifndef DOS
+                        //Switch fullscreen or windowed
+                        gameMenu.swithScreenFullWindow(cfgLoader, true);
+                        gameMenu.initDblBuffer(SCREEN_W, SCREEN_H);
+                        Fonts::exit();
+                        Fonts::init();
+                        Fonts::initFonts(SCREEN_H / SCREENHDIV);
+                        menuData.setLayout(menuData.layout, SCREEN_W, SCREEN_H);
+                        gameMenu.createMenuImages(menuData);
+                    #endif
                 } else if (key[KEY_ENTER] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_A)){
                     //Launching games
                     gameMenu.music.pauseBG();
@@ -194,7 +196,6 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu, CfgLoader &cfgLoader){
                         sound.play(SBTNCLICK);
                         limitFps = !limitFps;
                     }           
-
                 }
             }
             menuData.keyUp = gameMenu.isKeyUp() || gameMenu.joystick.isJoyReleased();

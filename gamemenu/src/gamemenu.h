@@ -182,6 +182,15 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
                 fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1 , SCREEN_W - listMenu.marginX, listMenu.marginY - 1, menuBars);
                 listMenu.draw(this->video_page);
 
+                //Drawing a transparent rectangle
+                if (SCREEN_W >= 640){
+                    static const int transBGText = makecol(0, 0, 50);
+                    set_trans_blender(255, 255, 255, 160);
+                    drawing_mode(DRAW_MODE_TRANS, video_page, 0, 0);
+                    rectfill(video_page, SCREEN_W / 2 + 1, listMenu.marginY, SCREEN_W, SCREEN_H, transBGText);
+                    drawing_mode(DRAW_MODE_SOLID, video_page, 0, 0);
+                }
+
                 //Draw and update the screen because the loading of images can take a long time
                 if (listMenu.keyUp){
                     string assetsDir = getPathPrefix(emu.assets) + string(Constant::tempFileSep);
@@ -195,7 +204,7 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
                     menuImages[SNAP].printImage(this->video_page);
                     blit(this->video_page, screen, 0, 0, 0, 0, this->video_page->w, this->video_page->h);
 
-                    if (SCREEN_W / 2 < 320){
+                    if (SCREEN_W < 640){
                         //If it's so small, only show the snapshot
                         return;
                     }
