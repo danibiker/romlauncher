@@ -157,6 +157,7 @@ void GameMenu::createMenuImages(ListMenu &listMenu){
     const int sectionGap = 0;
     const int textAreaY = listMenu.getH() / 2 + listMenu.getY() + sectionGap;
     TextArea textarea(SCREEN_W / 2, textAreaY, SCREEN_W / 2, SCREEN_H - textAreaY);
+    textarea.marginX = floor(SCREEN_W / 100);
     menuTextAreas.insert(make_pair(SYNOPSIS, textarea));
 }
 
@@ -168,6 +169,8 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
     //Drawing the emulator name
     ALFONT_FONT *fontBig = Fonts::getFont(Fonts::FONTBIG);
     ALFONT_FONT *fontsmall = Fonts::getFont(Fonts::FONTSMALL);
+    const int sepVertX = listMenu.getW();
+    const int halfWidth = SCREEN_W / 2;
 
     //Drawing the rest of list and images
     if (listMenu.getNumGames() > (size_t)listMenu.curPos){
@@ -176,10 +179,12 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
         if (!game->shortFileName.empty()){
             if (listMenu.layout == LAYBOXES) {
                 Constant::drawTextCentre(this->video_page, fontBig, emu.name.c_str(), 
-                    SCREEN_W / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
+                    halfWidth, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
                 
                 static const int menuBars = makecol(128, 128, 128);
                 fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1 , SCREEN_W - listMenu.marginX, listMenu.marginY - 1, menuBars);
+                fastline(this->video_page, sepVertX, listMenu.marginY , sepVertX, listMenu.getH() + listMenu.marginY - 1, menuBars);
+
                 listMenu.draw(this->video_page);
 
                 //Drawing a transparent rectangle
@@ -187,7 +192,7 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
                     static const int transBGText = makecol(0, 0, 50);
                     set_trans_blender(255, 255, 255, 160);
                     drawing_mode(DRAW_MODE_TRANS, video_page, 0, 0);
-                    rectfill(video_page, SCREEN_W / 2 + 1, listMenu.marginY, SCREEN_W, SCREEN_H, transBGText);
+                    rectfill(video_page, halfWidth + 1, listMenu.marginY, SCREEN_W, SCREEN_H, transBGText);
                     drawing_mode(DRAW_MODE_SOLID, video_page, 0, 0);
                 }
 
@@ -234,13 +239,13 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
                 menuImages[SNAPFS].printImage(this->video_page);
                 //Draw the menu element after the image
                 alfont_textout_centre_ex(this->video_page, fontBig, emu.name.c_str(), 
-                    SCREEN_W / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
+                    halfWidth, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
                 fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1, listMenu.getW(), listMenu.marginY - 1, Constant::textColor);
                 listMenu.draw(this->video_page);
 
             } else if (listMenu.layout == LAYTEXT) {
                 alfont_textout_centre_ex(this->video_page, fontBig, emu.name.c_str(), 
-                    SCREEN_W / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
+                    halfWidth, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
                 fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1, listMenu.getW(), listMenu.marginY - 1, Constant::textColor);
                 listMenu.draw(this->video_page);
             }
@@ -250,15 +255,18 @@ void GameMenu::refreshScreen(ListMenu &listMenu){
         alfont_textout_centre_ex(this->video_page, fontBig, emu.name.c_str(), 
             cfgLoader->getWidth() / 2, fontBig->face_h < listMenu.marginY ? (listMenu.marginY - fontBig->face_h) / 2 : 0 , Constant::textColor, -1);
         fastline(this->video_page, listMenu.marginX, listMenu.marginY - 1 , SCREEN_W - listMenu.marginX, listMenu.marginY - 1, Constant::textColor);
-        Constant::drawTextCentre(this->video_page, fontsmall, "No roms found", SCREEN_W / 2, SCREEN_H / 2, Constant::textColor, -1);
+        Constant::drawTextCentre(this->video_page, fontsmall, "No roms found", halfWidth, SCREEN_H / 2, Constant::textColor, -1);
         
     } else {
-        Constant::drawTextCentre(this->video_page, fontsmall, "The configuration is not valid", SCREEN_W / 2, SCREEN_H / 2, Constant::textColor, -1);
-        Constant::drawTextCentre(this->video_page, fontsmall, "Press TAB to select the next entry or", SCREEN_W / 2, SCREEN_H / 2 + fontsmall->face_h + 3, Constant::textColor, -1);
-        Constant::drawTextCentre(this->video_page, fontsmall, "Press ESC to exit", SCREEN_W / 2, SCREEN_H / 2 + (fontsmall->face_h + 3) * 2, Constant::textColor, -1);
+        Constant::drawTextCentre(this->video_page, fontsmall, "The configuration is not valid", halfWidth, SCREEN_H / 2, Constant::textColor, -1);
+        Constant::drawTextCentre(this->video_page, fontsmall, "Press TAB to select the next entry or", halfWidth, SCREEN_H / 2 + fontsmall->face_h + 3, Constant::textColor, -1);
+        Constant::drawTextCentre(this->video_page, fontsmall, "Press ESC to exit", halfWidth, SCREEN_H / 2 + (fontsmall->face_h + 3) * 2, Constant::textColor, -1);
     }
 }
 
+/**
+ * 
+ */
 void GameMenu::showMessage(string msg){
     int startGray = 240;
     static const int bkg = makecol(startGray, startGray, startGray);

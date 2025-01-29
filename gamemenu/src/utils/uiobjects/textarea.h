@@ -27,20 +27,21 @@ class TextArea : public Object{
             this->setY(y);
             this->setW(w);
             this->setH(h);
+            this->marginX = 0;
             init();
         }
 
         void init(){
-            filepath = "";
-            lineSpace = 3;
-            marginTop = 10;
-            lastScroll = 0;
+            this->filepath = "";
+            this->lineSpace = 3;
+            this->marginTop = 10;
+            this->lastScroll = 0;
             setObjectType(GUITEXTAREA);
 
-            enableScroll = true;
-            pixelDesp = 0;
-            timesWaiting = 0;
-            waiting = true;
+            this->enableScroll = true;
+            this->pixelDesp = 0;
+            this->timesWaiting = 0;
+            this->waiting = true;
         }
 
         int lineSpace;
@@ -49,6 +50,7 @@ class TextArea : public Object{
         //To scroll the text
         bool enableScroll;
         int lastScroll;
+        int marginX;
         uint16_t lastTick;
         uint16_t lastSubTick;
         uint16_t lastWaitTick;
@@ -56,13 +58,17 @@ class TextArea : public Object{
         bool waiting;
         float pixelDesp;
         
-
+        /**
+         * 
+         */
         bool loadTextFileFromGame(string baseDir, GameFile game, string ext){
             dirutil dir;
-            if (!loadTextFile(baseDir + dir.getFileNameNoExt(game.shortFileName) + ext)){
-                return loadTextFile(baseDir + dir.getFileNameNoExt(game.longFileName) + ext);
+            string fileToOpen = baseDir + dir.getFileNameNoExt(game.shortFileName) + ext;
+
+            if (dir.fileExists(fileToOpen.c_str())){
+                return loadTextFile(fileToOpen);
             } else {
-                return true;
+                return loadTextFile(baseDir + dir.getFileNameNoExt(game.longFileName) + ext);
             }
         }
 
@@ -95,7 +101,7 @@ class TextArea : public Object{
                     for (string word : words){
                         int wordW = alfont_text_length(fontSmall, word.c_str());
                         int lineW = alfont_text_length(fontSmall, lines.at(lines.size()-1).c_str());
-                        if (lineW + wordW + spaceW >= this->getW()){
+                        if (lineW + wordW + spaceW >= this->getW() - this->marginX){
                             lines.push_back("");
                             lines.at(lines.size()-1).append(word);
                         } else {
@@ -198,7 +204,7 @@ class TextArea : public Object{
                 string line = lines.at(i + this->lastScroll);
                 //textout_justify_ex(video_page, font, line.c_str(), this->getX(), this->getX() + this->getW() -1,
                 //    nextLineY - pixelDesp, this->getW() / 3, Constant::textColor, -1);
-                alfont_textout_ex(video_page, fontSmall, line.c_str(), this->getX(), nextLineY - pixelDesp, Constant::textColor, -1);
+                alfont_textout_ex(video_page, fontSmall, line.c_str(), this->getX() + this->marginX, nextLineY - pixelDesp, Constant::textColor, -1);
                 nextLineY = this->getY() + marginTop + (++i) * (fontSmall->face_h + lineSpace);
             } while ((size_t) (i + this->lastScroll) < lines.size() && nextLineY < this->getY() + this->getH() - fontSmall->face_h);
         }

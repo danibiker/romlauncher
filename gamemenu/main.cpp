@@ -141,11 +141,11 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu, CfgLoader &cfgLoader){
                     #endif
                 } else if (key[KEY_ENTER] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_A)){
                     //Launching games
-                    gameMenu.music.pauseBG();
+                    if (cfgLoader.configMain.background_music > 0) gameMenu.music.pauseBG();
                     sound.play(SBTNLOAD, true);
                     gameMenu.joystick.resetButtons();
                     gameMenu.launchProgram(menuData);
-                    gameMenu.music.playBG();
+                    if (cfgLoader.configMain.background_music > 0) gameMenu.music.playBG();
                 } else {
                     if (key[KEY_UP] || gameMenu.joystick.getButtonStat(gameMenu.joystick.J_UP)){
                         menuData.prevPos();
@@ -227,9 +227,9 @@ void processKeys(ListMenu &menuData, GameMenu &gameMenu, CfgLoader &cfgLoader){
 int main(int argc, char *argv[]){
     argv0 = argv[0];
     string rutaApp = SOUtils::iniciarSistema(argv);
-    CfgLoader cfgLoader;
-
     Traza::open();
+
+    CfgLoader cfgLoader;
     if (cfgLoader.isDebug()){
         Traza::level = Traza::T_DEBUG;
     }

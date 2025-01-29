@@ -17,8 +17,9 @@ using namespace std;
 
 class ListMenu : public Object{
     private:
-        const int waitTitleMove = 4000;
-        const int frameTimeText = 1000 / 20.0;
+        const int waitTitleMove = 2000;
+        const float textFps = 20.0;
+        const int frameTimeText = 1000 / textFps;
 
         void clearSelectedText(){
             if (imgText != NULL){
@@ -34,7 +35,7 @@ class ListMenu : public Object{
             curPos = 0;
             listSize = 0;
             maxLines = 0;
-            marginX = 10;
+            marginX = floor(screenw / 100);
             marginY = screenh / SCREENHDIV * 1.5;
             lastSel = -1;
             pixelShift = 0;
@@ -88,16 +89,16 @@ class ListMenu : public Object{
             clearSelectedText();
 
             if (layout == LAYBOXES){
-                this->setX(marginX);
+                this->setX(0);
                 this->setY(marginY);
-                this->setW(screenw / 2 - marginX);
+                this->setW(screenw / 2);
                 this->setH(screenh - marginY);
                 this->centerText = false;
                 this->layout = layout;
 
                 for (size_t i=0; i < listGames.size(); i++){
                     auto file = listGames.at(i).get();
-                    file->cutTitleIdx = Fonts::idxToCutTTF(file->gameTitle, this->getW(), Fonts::FONTBIG);
+                    file->cutTitleIdx = Fonts::idxToCutTTF(file->gameTitle, this->getW() - 2*this->marginX, Fonts::FONTBIG);
                 }
             } else {
                 this->setX(marginX);
@@ -122,6 +123,9 @@ class ListMenu : public Object{
 
             ALFONT_FONT *fontMenu = Fonts::getFont(Fonts::FONTBIG);
             const int centerPos = this->getX() + this->getW() / 2;
+            //To scroll one letter in one second. We use the face_h because the width of 
+            //a letter is not fixed.
+            const float pixelsScrollFps = max(ceil(fontMenu->face_h / textFps), 1.0f);
 
             for (int i=this->iniPos; i < this->endPos; i++){
                 auto game = this->listGames.at(i).get();
@@ -140,12 +144,12 @@ class ListMenu : public Object{
                         //when using antialiased text
                         set_trans_blender(255, 255, 255, 190);
                         drawing_mode(DRAW_MODE_TRANS, video_page, this->getX(), this->getY());
-                        rectfill(video_page, this->getX(), y, this->getW(), y + fontMenu->face_h, colorTrans);
+                        rectfill(video_page, this->getX() + marginX, y, this->getW() - marginX, y + fontMenu->face_h, colorTrans);
                         drawing_mode(DRAW_MODE_SOLID, video_page, this->getX(), this->getY());
                     } else {
                         lineTextColor = lightgray;
                     }
-                    rect(video_page, this->getX() - 1, y - 1, this->getW() + 1, y + fontMenu->face_h, bkg);
+                    rect(video_page, this->getX() - 1 + marginX, y - 1, this->getW() + 1 - marginX, y + fontMenu->face_h, bkg);
                 }
                 
                 //Drawing the selected option in a separate bitmap to allow scrolling
@@ -167,12 +171,12 @@ class ListMenu : public Object{
                     //Scrolling the text if it's big enough to not fill on the screen 
                     if (game->cutTitleIdx < game->gameTitle.length() && txtDifWidth > 0 && Constant::getTicks() > lastTick + frameTimeText){
                         //Waiting at the beginning and the end of the scrolling
-                        if (pixelShift == 0 || pixelShift + 1.0 == txtDifWidth){
+                        if (pixelShift == 0 || pixelShift + pixelsScrollFps >= txtDifWidth){
                             //Adding a decimal to not enter again while we should be waiting
                             pixelShift += 0.1;
                             lastTick += waitTitleMove;
                         } else {
-                            pixelShift = (int)floor(pixelShift + 1.0) % txtDifWidth;
+                            pixelShift = (int)floor(pixelShift + pixelsScrollFps) % txtDifWidth;
                             lastTick = Constant::getTicks();
                         }
                     }
@@ -187,10 +191,10 @@ class ListMenu : public Object{
                     if (layout == LAYBOXES && i == this->curPos && imgText != NULL){
                         //masked_blit for transparent surfaces with pink background
                         masked_blit(imgText, video_page, pixelShift, 0, 
-                            this->getX(), this->getY() + fontHeightRect, 
-                            this->getW() - this->marginX, fontMenu->face_h);
+                            this->getX() + marginX, this->getY() + fontHeightRect, 
+                            this->getW() - 2*this->marginX, fontMenu->face_h);
                     } else {
-                        Constant::drawText(video_page, fontMenu, line.c_str(), this->getX(), 
+                        Constant::drawText(video_page, fontMenu, line.c_str(), this->getX() + marginX, 
                             this->getY() + fontHeightRect, lineTextColor, lineBackground);
                     }
                 }
@@ -221,7 +225,7 @@ class ListMenu : public Object{
                                 filelong = Constant::Trim(Constant::replaceAll(uri.substr(found + 1), "\"", ""));
                                 //gameFile.gameTitle = Constant::cutToLength(filelong, this->getW());
                                 gameFile.gameTitle = filelong;
-                                gameFile.cutTitleIdx = Fonts::idxToCutTTF(filelong, this->getW(), Fonts::FONTBIG);
+                                gameFile.cutTitleIdx = Fonts::idxToCutTTF(filelong, this->getW() - 2*this->marginX, Fonts::FONTBIG);
                             }
                             listGames.push_back(make_unique<GameFile>(gameFile));
                         }
@@ -258,7 +262,7 @@ class ListMenu : public Object{
                 gameFile.longFileName = file->filename;
                 //gameFile.gameTitle = Constant::cutToLength(dir.getFileNameNoExt(file->filename), this->getW());
                 gameFile.gameTitle = dir.getFileNameNoExt(file->filename);
-                gameFile.cutTitleIdx = Fonts::idxToCutTTF(gameFile.gameTitle, this->getW(), Fonts::FONTBIG);
+                gameFile.cutTitleIdx = Fonts::idxToCutTTF(gameFile.gameTitle, this->getW() - 2*this->marginX, Fonts::FONTBIG);
                 this->listGames.push_back(make_unique<GameFile>(gameFile));
             }
             

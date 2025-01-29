@@ -50,8 +50,17 @@ class CfgLoader{
          */
         void loadMainConfig(){
             dirutil dir;
-
             string filepath = Constant::getAppDir() + string(Constant::tempFileSep) + CONFIGFILE;
+
+            if (!dir.fileExists(filepath.c_str())){
+                Traza::print(Traza::T_DEBUG, "Main config file not found: " + filepath);
+                string upperCfgFile = CONFIGFILE;
+                Constant::upperCase(&upperCfgFile);
+                filepath = Constant::getAppDir() + string(Constant::tempFileSep) + upperCfgFile;
+                if (!dir.fileExists(filepath.c_str())){
+                    Traza::print(Traza::T_ERROR, "Main config file not found: " + filepath);
+                }
+            }
 
             fstream emucfg;
             emucfg.open(filepath, ios::in);

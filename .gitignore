@@ -57,6 +57,7 @@ gamemenu/dep/dosdev
 gamemenu/gmenu/config/*.cfg
 gamemenu/gmenu/config/*.map
 gamemenu/gmenu/assets
+!gamemenu/gmenu/assets/music/
 #maven
 .mvn/
 HELP.md

@@ -26,7 +26,8 @@ class Traza{
         static void print(int l, string message){
             if (fp != NULL && l >= level){
                 fprintf(fp, "%s\n", message.c_str());
-                if (level == T_DEBUG) fflush(fp);
+                if (level == T_DEBUG || l == T_ERROR) 
+                    fflush(fp);
             }
         }
 
