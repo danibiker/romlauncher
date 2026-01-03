@@ -8,9 +8,11 @@ echo "************************************************"
 echo "*** Downloading for WINDOWS NATIVE COMPILING ***"
 echo "************************************************"
 
-wget https://github.com/liballeg/allegro5/releases/download/4.4.3/allegro-4.4.3.zip
+wget -nc https://github.com/liballeg/allegro5/releases/download/4.4.3/allegro-4.4.3.zip
 unzip -q allegro-4.4.3.zip -d dosdev
 cd dosdev/allegro
+#Change the minimum required version for the latest version of cmakelists to work 
+sed -i 's/cmake_minimum_required(VERSION 2.6 FATAL_ERROR)/cmake_minimum_required(VERSION 3.5 FATAL_ERROR)/g' CMakeLists.txt
 mkdir build
 mkdir bin
 cd build
@@ -22,6 +24,9 @@ echo "4. Set the CMAKE_INSTALL_PREFIX to dosdev/allegro/bin"
 echo "5. Press configure and Generate"
 echo "6. Exit and let the script continue"
 echo "-----------------------------------------------------------"
+export CMAKE_INSTALL_PREFIX="$currdir/dosdev/allegro/bin"
+export WANT_TESTS=OFF 
+rm dosdev/allegro/CMakeCache.txt 
 cmake-gui ..
 make
 make install
